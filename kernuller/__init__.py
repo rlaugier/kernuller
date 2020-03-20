@@ -2,6 +2,8 @@ import numpy as np
 
 from . import kernel_cm
 from .kernel_cm import br, bo, vdg, bbr
+from . import interferometers
+from .interferometers import CHARA, VLTI, redarray
 #from .detection_maps import detection_maps as dmap
 
 

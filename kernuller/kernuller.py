@@ -33,31 +33,41 @@ def rad2mas(x):
     '''  convert radians to mas'''
     return(x / 4.8481368110953599e-09) # = x / (np.pi/(180*3600*1000))
 
-def sp2np(mat):
+def sp2np(mat, dtype=np.complex128):
+    """
+    A quick function to convert a sympy complex matrix into numpy.
+    
+    """
     try:
-        npmat = np.array(sp.N(S), dtype=np.complex128)
+        npmat = np.array(sp.N(S), dtype=np.dtype)
     except:
-        npmat = np.array(sp.N(S).tolist(), dtype=np.complex128)
+        npmat = np.array(sp.N(S).tolist(), dtype=np.dtype)
         print("Had to convert to a list")
     return npmat
 
 
 def printlatex(symbolic, imaginary_unit="j"):
+    """
+    A convenience function to print a sympy symbolic expression into LaTeX source code.
+    """
     prefix = "\\begin{equation}\n  "
     suffix = "\n\end{equation}"
     print(prefix + sp.latex(symbolic, imaginary_unit=imaginary_unit) + suffix, file=sys.stdout)
 
 def pol2cart(rho, theta):
+    """
+    A quick little function to transform from polar to cartesian coordinates.
+    """
     x = -np.imag(rho*np.exp(1j*theta*np.pi/180))
     y = np.real(rho*np.exp(1j*theta*np.pi/180))
     return np.array([x, y])
 
-def get_contrast(self, signal, cov):
-    nbkp = thekpo.kpi.nbkp
-    xsi = chi2.ppf(1.-pfa, nbkp)
-    c0 = 1.e3 #Fixing reference contrast
     
 def expected_numbers(Na):
+    """
+    Prints out the expected number of baselines, nulls, independant nulls, for a given
+    Na number of apertures (assumed to be non-redundant)
+    """
     print("Assuming nonredundant baselines")
     Nn = Na -1
     Nbl = np.math.factorial(Na)/\
@@ -99,7 +109,7 @@ class kernuller(object):
         self.A = None
         self.K = None
         self.paper_difforder = True
-        self.Taylor_order = 2
+        self.Taylor_order = 2 #The order to which to develop the phase perturbation
         self.perms = None
     def summary_properties(self, verbose=False, latex=False):
         if self.Np is not None:
@@ -842,7 +852,8 @@ class kernuller(object):
     def get_rank(self, params, thr=1e-6, verbose=False, mode="kernels"):
         """
         Returns the rank of the nuller,
-        that is the number of independant kenelises outputs
+        that is the number of independant kenelises outputs.
+        The rank is computed based on the rank of the output vector set obtained with a large set of input companion parameters (rho, theta, c)
         
         params    :   A bunch of random binary parameters in the ROI 
                     (must be more than the original number of nulled outputs)
@@ -862,8 +873,7 @@ class kernuller(object):
 
     def legacy_nulled_output(self,matrix=None, valtheta=sp.pi/2, simplified=False):
         """
-        Plots the complex combinations of the nulled outputs of 
-        legacy-style (S.N) nuller.
+        Plots the complex combinations of the nulled outputs of legacy-style (S.N) nuller. The interest of this function is to give decomposed views of 2-stage nullers. However, it is designed for the special case if S.N ...
         valtheta    : the value of the parameter theta for the nuller
         simplified  : whether to compute the sum of each telescope's
                         phased contribution.
@@ -897,12 +907,23 @@ class kernuller(object):
             fig.suptitle("Unsimplified representation\n of nulled outputs")
         return fig, axs
     
-    def plot_response_maps(self,data, nx=1,ny=None,plotsize=2, cmap="coolwarm", extent=None,
+    def plot_response_maps(self,data, nx=1,ny=None, plotsize=2, cmap="coolwarm", extent=None,
                           title="On-sky respnse maps", plotspaces=(0.2,0.2),
-                          unit="mas"):
+                          unit="mas", cbar_label=None):
         """
-        Plots a set of maps into a single figure
+        Plots a set of maps into a single figure. Produces a 2D grid of imshow plots showing the maps.
+        
         data    : A set of maps piled along the 0 axis
+        nx       : The number of columns of plots
+        ny       : The number of rows of plots (if provided)
+        plotsize : The size (matplotlib inches) of each plot
+        plotspaces: The space between plots
+        cmap     : The colormap to use (default: coolwarm). Use binary colormaps for data that range from positive to negative...
+        extent   : The region covered by the map (min, max, min, max)
+        unit     : The unit for extent
+        title    : A title for the whole figure: either the title string, a None object (use default title) or a False boolean (no title).
+        cbar_label: A label for the colorbar
+        
         """
         if ny is None:
             ny = data.shape[0]//nx
@@ -939,7 +960,10 @@ class kernuller(object):
         plt.ylabel("On-sky DEC position (%s)"%(unit))
         fig.subplots_adjust(right=0.8)
         cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-        fig.colorbar(im, cax=cbar_ax)
+        cbar = fig.colorbar(im, cax=cbar_ax)
+        if cbar_label is not None:
+            cbar.set_label(cbar_label)
+        
 
         return fig, axs
     
@@ -1003,15 +1027,35 @@ class kernuller(object):
         return fig, axs
     
     
-    def plot_outputs_smart(self,matrix=None, inputfield=None, nx=4,ny=None,
-                       verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.5,0.5), onlyonelegend=True,
-                       labels=True, legend=True,legendsize=8, title=None, projection="polar",
-                       out_label=None, rmax=None, show=True):
+    def plot_outputs_smart(self,matrix=None, inputfield=None, nx=4,ny=None,legendoffset=(2,1),
+                       verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.25,0.25), onlyonelegend=True,
+                       labels=True, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
+                       out_label=None, rmax=None, show=True, onlyoneticklabel=True, labelsize=15,
+                       rlabelpos=20):
         """
-        Plots the complex combinations of the nulled outputs for 
-        procedural kernullers.
+        Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
+        returns a fig, and  axs objects.
+        matrix   : The matrix to plot. If None (default) method plots self.Np
+        inputfield: An input field fed to the combiner. If provided, a plot of M.dot(np.dag(inputfield))
         nx       : The number of columns of plots
+        ny       : The number of rows of plots (if provided)
+        legendoffset: An offset for the legend (to put it in a free space)
+        verbose  : 
         osfrac   : The fraction of the amplitude of phasors to use as offset.
+        plotsize : The size (matplotlib inches) of each plot
+        plotspaces: The space between plots
+        labels   : Whether to use the little numbers on each phasor
+        legend   : Whether to use a legend for the colors
+        legendsize: The size of the legend
+        legendstring: The string used by pyplot to use as reference for the legend location
+        title    : A title for the whole figure: either the title string, a None object (use default title) or a False boolean (no title).
+        projection: if "polar" will use polar plots
+        out_label: colored labels for each of the output plot. Requires an array corresponding to each row of the matrix.
+        rmax     : The outer limit of the plot (max amplitude)
+        show     : Whether to plt.show the figure at the end.
+        onlyoneticklabel: Remove tick labels for all but the bottom left plots
+        labelsize: Size fot the tick labels (default: 15))
+        rlabelpos: The angle at which to put the amplitude tick labels (default: 20)
         """
         special = True
         
@@ -1038,7 +1082,7 @@ class kernuller(object):
         ntot = matrix.shape[0]
         
         if projection=="polar":
-            sharex="all"
+            sharex="none"
             sharey="all"
             text_coords="polar"
         else:
@@ -1049,11 +1093,16 @@ class kernuller(object):
             rmax=np.max(matrix)
         
         fig, axs = plt.subplots(ny,nx,sharex=sharex, sharey=sharey,
-                                gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]}, figsize=(plotsize*nx,plotsize*matrix.shape[0]//nx+0.5),
+                                gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
+                                figsize=(plotsize*nx,plotsize*matrix.shape[0]//nx+0.5),
                                 subplot_kw=dict(projection=projection))
         
         for i in range(axs.shape[0]):
             for j in range(nx):
+                if (i==0) or (not labels):
+                    addlabel=False
+                else:
+                    addlabel=True
                 plotted = []
                 adjust=[]
                 for k in range(matrix.shape[1]):
@@ -1065,7 +1114,7 @@ class kernuller(object):
                         
                         plotted = plotitem(axs, item, plotted, nx, i, j, k,
                                            osfrac=osfrac, baseoffset=baseoffset,
-                                           linestyle="-", label=str(k), labels=labels,
+                                           linestyle="-", label=str(k), labels=addlabel,
                                            projection=projection, rmax=rmax)
                 
                 plotted2 = []
@@ -1076,8 +1125,8 @@ class kernuller(object):
                         baseoffset = 0
                         if item==0:
                             continue
-                        
-                        plotted = plotitem(axs, item, plotted2, nx, i, j, k,
+                        if i != 0:#We just don't plot the reference for the bright
+                            plotted = plotitem(axs, item, plotted2, nx, i, j, k,
                                            osfrac=osfrac, baseoffset=baseoffset,
                                            linestyle="--", label=None, labels=False,
                                            projection=projection, rmax=rmax, linewidth=2)
@@ -1110,15 +1159,15 @@ class kernuller(object):
                     if nx==1:
                         if onlyonelegend:
                             if i==0:
-                                axs[i].legend(prop={'size': legendsize})
+                                axs[i].legend(loc=legendstring, prop={'size': legendsize})
                         else :
-                            axs[i].legend(prop={'size': legendsize})
+                            axs[i].legend(loc=legendstring, prop={'size': legendsize})
                     else :
                         if onlyonelegend:
                             if i*nx+j ==0:
-                                axs[i,j].legend(prop={'size': legendsize})
+                                axs[i,j].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                         else:
-                            axs[i,j].legend(prop={'size': legendsize})
+                            axs[i,j].legend(loc=legendstring, prop={'size': legendsize})
                             
                 if out_label is not None:
                     if nx==1:
@@ -1144,13 +1193,24 @@ class kernuller(object):
         xT = np.arange(0, 2*np.pi,np.pi/4)
         xL=['0',r'$\frac{\pi}{4}$',r'$\frac{\pi}{2}$',r'$\frac{3\pi}{4}$',\
                 r'$\pi$',r'$\frac{5\pi}{4}$',r'$\frac{3\pi}{2}$',r'$\frac{7\pi}{4}$']
+        removeticklabels = np.zeros_like(rowstoremove)
+        if onlyoneticklabel:
+            removeticklabels = np.ones_like(rowstoremove)
+            removeticklabels[-nx] = 0
+        #print("removing the labels:", removeticklabels)
+        #print("removing the rows:", rowstoremove)
         for i in np.flip(np.arange(matrix.shape[0])):
             
             fig.axes[i].set_xticks(xT)
             fig.axes[i].set_xticklabels(xL)
+            fig.axes[i].set_rlabel_position(rlabelpos)
+            fig.axes[i].tick_params(labelsize=labelsize)
+            #print("adding labels",xL)
             if rowstoremove[i] :
                 fig.axes[i].remove()
-            
+            if removeticklabels[i]:
+                fig.axes[i].set_xticklabels([])
+                #fig.axes[i].set_yticklabels([])
                             
         if title is not False:
             if title is None:
@@ -1164,15 +1224,34 @@ class kernuller(object):
 
     
     
-    def plot_pupils(self, offset=5, s=20):
+    def plot_pupils(self, offset=5, s=20, marginratio=2., title=None, plotcircle=False, circlestyle=None):
+        """
+        Plots a map of the pupil based on self.pups.
+        offset     : The offset for the label of each pupil
+        s          : The size of the pupil markers
+        title    : A title for the whole figure: either the title string, a None object (use default title) or a False boolean (no title).
+        marginratio: The ratio of offset to use to padd the map (use if labels are out of the map)
+        plotcircle : radius and angles to plot a circle representing the size of the pupil
+        circlestyle: the format string for the plotting of the circle
+        
+        """
+        if title is None:
+            title = "A map of the interferometer"
         a = plt.figure()
         for i in range(self.pups.shape[0]):
             plt.scatter(self.pups[i,0], self.pups[i,1], marker="o", s=s)
             plt.text(self.pups[i,0]+offset, self.pups[i,1]+offset,i)
-        plt.gca().set_aspect("equal")
+        if plotcircle:
+            plt.plot(plotcircle[0]*np.cos(plotcircle[1]), plotcircle[0]*np.sin(plotcircle[1]),circlestyle)
+        else:
+            plt.xlim(np.min(self.pups[:,0])-marginratio*offset, np.max(self.pups[:,0])+marginratio*offset)
+            plt.ylim(np.min(self.pups[:,1])-marginratio*offset, np.max(self.pups[:,1])+marginratio*offset)
         plt.xlabel("East position (m)")
         plt.ylabel("North position (m)")
-        plt.title("A map of the interferometer")
+        
+        plt.gca().set_aspect("equal")
+        if title:
+            plt.title(title)
         plt.show()
         return a
 
@@ -1195,7 +1274,7 @@ class kernuller(object):
     
     def find_valid_nulls_systematic(self, params, target_rank=None):
         """
-        Looks for 
+        Prunes a nulling matrix by removing rows starting from the last and testing if the outputs remain independent.
         """
         if target_rank is None:
             target_rank = self.Nthk
@@ -1221,6 +1300,22 @@ class kernuller(object):
         return indices
     
 def generative_random_pruning(matrix, niter):
+    """
+    Explore the space of pruning possibilities for a nuller. The function implements the rules proposed by Laugier et al. 2020:
+    - Each phasor used for each input the same number of times.
+    - The nulls are created as complex conjugate pairs.
+    - The number of nulls sought is 2xn_closurephases.
+    It then tests if the matrix has all singular values are ones. (This is expected to give matrices easier to implement.)
+    The method uses random number generators to explore the possibilities. Possible nulls are picked from the matrix, and removed to keep track. The approach uses sympy and numpy in parallel to get both speed and exactness.
+    The function returns a set of sympy matrices of the solutions found, and recipes describing the corresponding picks.
+    
+    matrix  : The initial full null matrix
+    niter   : The number of iterations to run
+    
+    ################################################################################################################
+    WARNING. For the recipes to remain usable, the generative_from_recipe must evolve in conjunction with this one!!
+    ################################################################################################################
+    """
     ss = []
     matrices = []
     recipes = []
@@ -1286,6 +1381,16 @@ def generative_random_pruning(matrix, niter):
     return matrices, recipes
 
 def generative_from_recipe(matrix, recipe):
+    """
+    Applies the same selection process as generative_random_pruning, but in a deterministic way, using recipe.
+    
+    matrix  : The initial full null matrix
+    recipe  : A list of picks generated by generative_random_pruning
+    
+    ################################################################################################################
+    WARNING. For the recipes to remain usable, this function must evolve in conjunction with generative_random_pruning
+    ################################################################################################################
+    """
     na = matrix.shape[1]
     runningmat = matrix[1:,:].copy()
     running_approx = np.array(sp.N(runningmat), dtype=np.complex128)
@@ -1358,8 +1463,8 @@ def get_signature_fast(matrix, threshold=1e-8):
 
 def pairwise_kernel(n):
     """
-    Returns a kernel for pairwise nullers
-    n :  The number of nulls
+    Returns a kernel for pairwise nullers. Enantiomorph nulls must be consecutive of each-other
+    n :  The number of nulls (must be even)
     """
     kervec = np.zeros(n)
     kervec[:2] = np.array([1,-1])

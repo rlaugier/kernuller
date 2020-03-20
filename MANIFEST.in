@@ -1,0 +1,3 @@
+include README.rst
+include kernuller/data/chara.dat
+include setup.py

@@ -19,7 +19,6 @@ setup(name='kernuller',
       install_requires=[
           'numpy', 'sympy', 'scipy', 'matplotlib', 'astropy','tqdm', 'astropy'
       ],
-      data_files = None,
-      include_package_data=False,
+      include_package_data=True,
       zip_safe=False)
 
