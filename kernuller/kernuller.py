@@ -25,6 +25,8 @@ xcoupler = sp.Matrix([[coeff,coeff],
 
 
 
+
+
 def mas2rad(x):
     ''' Convenient little function to convert milliarcsec to radians '''
     return(x * 4.8481368110953599e-09) # = x*np.pi/(180*3600*1000)
@@ -81,6 +83,150 @@ def expected_numbers(Na):
     Nthk = Nbl - (Na - 1)
     print(Nthk, "robust observables")
     print(Nthk*2, "independant nulls")
+    
+    
+    
+def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
+             baseoffset=0, linestyle="-", label="X", linewidth=5,
+             labels=True, projection="polar", rmax=1.):
+    """
+    A function that serves as a macro to plot the complex amplitude vectord for CMP
+    
+    axs      : The axis objects for the plot
+    item     : The complex amplitude to plot
+    plotted  : The complex amplitude already plotted (things will get staggered if 
+                    two identical complex amplitudes are plotted)
+    nx       : The number of columns of plots (indexing is 1D if there is only one column)
+    i        : The first index of the plot
+    j        : The second index of the plot
+    k        : The index of the phasor to plot
+    osfrac   : The fraction of the amplitude to use as offset
+    verbose  : Gives more information on what happens
+    baseoffset : The offset in the start of the vector to use (only special cases)
+    linestyle : Used for plotting dashed lines
+    label    : The label to use for the legend
+    linewidth : Self explanatory
+    labels   : Whether to include a little label for each vector
+    projection : Whether to use a polar or cartesian projection (cartesian no longer maintained)
+    rmax      : The maximum norm to for the plot 
+    """
+    
+    offset = osfrac*np.abs(item)*np.exp(1j*(np.angle(item)+np.pi/2))
+    
+    while item in plotted:
+        item += offset
+        baseoffset += offset
+    if projection=="polar":
+        a0=np.angle(baseoffset)
+        b0=np.abs(baseoffset)
+        a1=np.angle(item)
+        b1=np.abs(item)
+        a2=np.angle(offset)
+        b2=np.abs(offset)
+    else:
+        a0=np.real(baseoffset)
+        b0=np.imag(baseoffset)
+        a1=np.real(item)
+        b1=np.imag(item)
+        a2=np.real(offset)
+        b2=np.imag(offset)
+    if nx==1:
+        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
+        axs[i].plot([a0,a1], [b0,b1],
+                      color="C"+str(k), linewidth=linewidth,
+                      linestyle=linestyle, label=label)
+        if labels:
+            axs[i].text(0.95*a1, 0.9*b1, str(k))
+        axs[i].set_aspect("equal")
+        axs[i].set_ylim(0,rmax)
+
+    else:
+
+        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
+        axs[i,j].plot([a0,a1], [b0,b1],
+                      color="C"+str(k), linewidth=linewidth,
+                      linestyle=linestyle, label=label)
+        if labels:
+            axs[i,j].text(0.95*a1, 0.9*b1, str(k))
+        axs[i,j].set_aspect("equal")
+        axs[i,j].set_ylim(0,rmax)
+    plotted.append(item)
+    return plotted
+
+def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
+             baseoffset=0, linestyle="-", label="X", linewidth=5,
+             labels=True, projection="polar", rmax=1.):
+    """
+    A function that serves as a macro to plot the complex amplitude vectord for CMP
+    
+    axs      : The axis objects for the plot
+    item     : The complex amplitude to plot
+    plotted  : The complex amplitude already plotted (things will get staggered if 
+                    two identical complex amplitudes are plotted)
+    nx       : The number of columns of plots (indexing is 1D if there is only one column)
+    i        : The first index of the plot
+    j        : The second index of the plot
+    k        : The index of the phasor to plot
+    osfrac   : The fraction of the amplitude to use as offset
+    verbose  : Gives more informations on what happens
+    baseoffset : The offset in the start of the vector to use (only special cases)
+    linestyle : Used for plotting dashed lines
+    label    : The label to use for the legend
+    linewidth : Currently not corrected (the scale is very different from the other plotitem function)
+    labels   : Whether to include a little label for each vector
+    projection : Whether to use a polar or cartesian projection (cartesian not tested)
+    rmax      : The maximum norm to for the plot 
+    """
+    
+    offset = osfrac*np.abs(item)*np.exp(1j*(np.angle(item)+np.pi/2))
+    
+    if verbose: print("initial",item)
+    while item+baseoffset in plotted:
+        #item += offset
+        baseoffset += offset
+        if verbose: print("shifting")
+    if projection=="polar":
+        a0=np.angle(baseoffset)
+        if verbose: print("final, base angle", a0)
+        b0=np.abs(baseoffset)
+        if verbose: print("final, base norm", b0)
+        a1=np.angle(item+baseoffset) - np.angle(baseoffset)
+        if verbose: print("final, item angle", a1)
+        b1=np.abs(item + baseoffset) - np.abs(baseoffset)
+        if verbose: print("final, item norm", b1)
+        a2=np.angle(offset)
+        if verbose: print("final, offset angle", a2)
+        b2=np.abs(offset)
+        if verbose: print("final, offset norm", b2)
+    else:
+        a0=np.real(baseoffset)
+        b0=np.imag(baseoffset)
+        a1=np.real(item)
+        b1=np.imag(item)
+        a2=np.real(offset)
+        b2=np.imag(offset)
+    if nx==1:
+        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
+        axs[i].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
+                      color="C"+str(k), width=0.03,
+                      linestyle=linestyle, label=label)
+        if labels:
+            axs[i].text(0.95*a1, 0.9*b1, str(k))
+        axs[i].set_aspect("equal")
+        axs[i].set_ylim(0,rmax)
+
+    else:
+
+        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
+        axs[i,j].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
+                      color="C"+str(k), width=0.025,
+                      linestyle=linestyle, label=label)
+        if labels:
+            axs[i,j].text(0.95*a1, 0.9*b1, str(k))
+        axs[i,j].set_aspect("equal")
+        axs[i,j].set_ylim(0,rmax)
+    plotted.append(item+baseoffset)
+    return plotted
 
 
 class kernuller(object):
@@ -1027,11 +1173,11 @@ class kernuller(object):
         return fig, axs
     
     
-    def plot_outputs_smart(self,matrix=None, inputfield=None, nx=4,ny=None,legendoffset=(2,1),
+    def plot_outputs_smart(self,matrix=None, inputfield=None, nx=4,ny=None,legendoffset=(1.6,0.5),
                        verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.25,0.25), onlyonelegend=True,
                        labels=True, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
                        out_label=None, rmax=None, show=True, onlyoneticklabel=True, labelsize=15,
-                       rlabelpos=20):
+                       rlabelpos=20, autorm=True, plotter=plotitem_arrow):
         """
         Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
         returns a fig, and  axs objects.
@@ -1056,6 +1202,8 @@ class kernuller(object):
         onlyoneticklabel: Remove tick labels for all but the bottom left plots
         labelsize: Size fot the tick labels (default: 15))
         rlabelpos: The angle at which to put the amplitude tick labels (default: 20)
+        autorm   : Automatically remove empty rows True=auto, False=keep all, Boolean array: the rows to remove
+        plotter  : A function for plotting fancy arrow vectors
         """
         special = True
         
@@ -1111,14 +1259,15 @@ class kernuller(object):
                         baseoffset = 0
                         if item==0:
                             continue
-                        
-                        plotted = plotitem(axs, item, plotted, nx, i, j, k,
+                        #Here we use plotter, the optional function for plotting vectors
+                        plotted = plotter(axs, item, plotted, nx, i, j, k, verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,
                                            linestyle="-", label=str(k), labels=addlabel,
                                            projection=projection, rmax=rmax)
                 
                 plotted2 = []
                 adjus2t = []
+                #Plotting the dashed lines for the matrix itself
                 for k in range(initialmatrix.shape[1]):
                     if (i*nx+j)<initialmatrix.shape[0]:
                         item = initialmatrix[i*nx+j,k]
@@ -1130,6 +1279,7 @@ class kernuller(object):
                                            osfrac=osfrac, baseoffset=baseoffset,
                                            linestyle="--", label=None, labels=False,
                                            projection=projection, rmax=rmax, linewidth=2)
+                #Plotting the output result (black stuff)
                 if (outvec is not None) and ((i*nx+j)<matrix.shape[0]):
                     if nx==1:
                         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
@@ -1159,15 +1309,15 @@ class kernuller(object):
                     if nx==1:
                         if onlyonelegend:
                             if i==0:
-                                axs[i].legend(loc=legendstring, prop={'size': legendsize})
+                                axs[i].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                         else :
-                            axs[i].legend(loc=legendstring, prop={'size': legendsize})
+                            axs[i].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                     else :
                         if onlyonelegend:
                             if i*nx+j ==0:
                                 axs[i,j].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                         else:
-                            axs[i,j].legend(loc=legendstring, prop={'size': legendsize})
+                            axs[i,j].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                             
                 if out_label is not None:
                     if nx==1:
@@ -1189,10 +1339,17 @@ class kernuller(object):
                                 edgecolor="C"+str((i*nx+j)//2),
                                 ))
         #eliminating the empty plots
-        rowstoremove = np.prod(matrix, axis=1) == 0
+        if autorm is True:
+            rowstoremove = np.prod(matrix, axis=1) == 0
+        elif autorm is False:
+            rowstoremove = np.zeros(matrix.shape[0], dtype=np.bool)
+        else :
+            rowstoremove = autorm
         xT = np.arange(0, 2*np.pi,np.pi/4)
         xL=['0',r'$\frac{\pi}{4}$',r'$\frac{\pi}{2}$',r'$\frac{3\pi}{4}$',\
                 r'$\pi$',r'$\frac{5\pi}{4}$',r'$\frac{3\pi}{2}$',r'$\frac{7\pi}{4}$']
+        #xL=['0',r'$\pi/4$',r'$\pi/2$',r'$3\pi/4$',\
+        #        r'$\pi$',r'$5\pi/4$',r'$3\pi/2}$',r'$7\pi/4$']
         removeticklabels = np.zeros_like(rowstoremove)
         if onlyoneticklabel:
             removeticklabels = np.ones_like(rowstoremove)
@@ -1479,47 +1636,3 @@ mykernuller = kernuller(VLTI[:3],3.6e-6)
 mykernuller.build_procedural_model(verbose=False)
 tricoupler = sp.Matrix([mykernuller.Ms[1,:], mykernuller.Ms[0,:], mykernuller.Ms[2,:]])
 
-def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,
-             baseoffset=0, linestyle="-", label="X", linewidth=5,
-             labels=True, projection="polar", rmax=1.):
-    
-    offset = osfrac*np.abs(item)*np.exp(1j*(np.angle(item)+np.pi/2))
-    while item in plotted:
-        item += offset
-        baseoffset += offset
-    if projection=="polar":
-        a0=np.angle(baseoffset)
-        b0=np.abs(baseoffset)
-        a1=np.angle(item)
-        b1=np.abs(item)
-        a2=np.angle(offset)
-        b2=np.abs(offset)
-    else:
-        a0=np.real(baseoffset)
-        b0=np.imag(baseoffset)
-        a1=np.real(item)
-        b1=np.imag(item)
-        a2=np.real(offset)
-        b2=np.imag(offset)
-    if nx==1:
-        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-        axs[i].plot([a0,a1], [b0,b1],
-                      color="C"+str(k), linewidth=linewidth,
-                      linestyle=linestyle, label=label)
-        if labels:
-            axs[i].text(0.95*a1, 0.9*b1, str(k))
-        axs[i].set_aspect("equal")
-        axs[i].set_ylim(0,rmax)
-
-    else:
-
-        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-        axs[i,j].plot([a0,a1], [b0,b1],
-                      color="C"+str(k), linewidth=linewidth,
-                      linestyle=linestyle, label=label)
-        if labels:
-            axs[i,j].text(0.95*a1, 0.9*b1, str(k))
-        axs[i,j].set_aspect("equal")
-        axs[i,j].set_ylim(0,rmax)
-    plotted.append(item)
-    return plotted
