@@ -88,7 +88,7 @@ def expected_numbers(Na):
     
 def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
              baseoffset=0, linestyle="-", label="X", linewidth=5,
-             labels=True, projection="polar", rmax=1.):
+             labels=True, projection="polar", rmax=1.,zorder=1):
     """
     A function that serves as a macro to plot the complex amplitude vectord for CMP
     
@@ -134,7 +134,7 @@ def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
         axs[i].plot([a0,a1], [b0,b1],
                       color="C"+str(k), linewidth=linewidth,
-                      linestyle=linestyle, label=label)
+                      linestyle=linestyle, label=label, zorder=zorder)
         if labels:
             axs[i].text(0.95*a1, 0.9*b1, str(k))
         axs[i].set_aspect("equal")
@@ -145,7 +145,7 @@ def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
         axs[i,j].plot([a0,a1], [b0,b1],
                       color="C"+str(k), linewidth=linewidth,
-                      linestyle=linestyle, label=label)
+                      linestyle=linestyle, label=label, zorder=zorder)
         if labels:
             axs[i,j].text(0.95*a1, 0.9*b1, str(k))
         axs[i,j].set_aspect("equal")
@@ -154,8 +154,8 @@ def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
     return plotted
 
 def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
-             baseoffset=0, linestyle="-", label="X", linewidth=5,
-             labels=True, projection="polar", rmax=1.):
+             baseoffset=0, linestyle="-", label="X", linewidth=0.025,
+             labels=True, projection="polar", rmax=1., addring=False, zorder=1):
     """
     A function that serves as a macro to plot the complex amplitude vectord for CMP
     
@@ -179,6 +179,10 @@ def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
     """
     
     offset = osfrac*np.abs(item)*np.exp(1j*(np.angle(item)+np.pi/2))
+    if k is "black":
+        thecolor = "k"
+    else:
+        thecolor = "C"+str(k)
     
     if verbose: print("initial",item)
     while item+baseoffset in plotted:
@@ -208,23 +212,31 @@ def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
     if nx==1:
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
         axs[i].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
-                      color="C"+str(k), width=0.03,
-                      linestyle=linestyle, label=label)
+                      color=thecolor, width=linewidth, headlength=2.5, headaxislength=2.2,
+                      linestyle=linestyle, label=label, zorder=zorder)
         if labels:
             axs[i].text(0.95*a1, 0.9*b1, str(k))
         axs[i].set_aspect("equal")
         axs[i].set_ylim(0,rmax)
+        if addring:
+            thetas = np.linspace(0,2*np.pi,100)
+            axs[i].plot(thetas, np.ones_like(thetas)*np.abs(item),
+                                      color=thecolor, zorder=zorder)
 
     else:
 
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
         axs[i,j].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
-                      color="C"+str(k), width=0.025,
-                      linestyle=linestyle, label=label)
+                      color=thecolor, width=linewidth, headlength=2.5, headaxislength=2.2,
+                      linestyle=linestyle, label=label, zorder=zorder)
         if labels:
             axs[i,j].text(0.95*a1, 0.9*b1, str(k))
         axs[i,j].set_aspect("equal")
         axs[i,j].set_ylim(0,rmax)
+        if addring:
+            thetas = np.linspace(0,2*np.pi,100)
+            axs[i,j].plot(thetas, np.ones_like(thetas)*np.abs(item),
+                                      color=thecolor, zorder=zorder)
     plotted.append(item+baseoffset)
     return plotted
 
@@ -1080,19 +1092,24 @@ class kernuller(object):
         gmin, gmax = np.nanmin(data), np.nanmax(data)
         
         fig, axs = plt.subplots(ny,nx,sharex='col', sharey='row',
-                                gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]}, figsize=(plotsize*nx,plotsize*ny +0.1), )
-        for i in range(axs.shape[0]):
-            for j in range(nx):
-                if nx==1:
+                                gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
+                                figsize=(plotsize*nx,plotsize*ny +0.1), )
+        if ny == 1:
+            im = axs.imshow(data[0,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
+            axs.set_aspect("equal")
+        else:
+            for i in range(axs.shape[0]):
+                for j in range(nx):
+                    if nx==1:
 
-                    #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-                    im = axs[i].imshow(data[i,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
-                    axs[i].set_aspect("equal")
-                else:
-                    if i*j<=data.shape[0]:
                         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-                        im = axs[i,j].imshow(data[i*nx+j,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
-                        axs[i,j].set_aspect("equal")
+                        im = axs[i].imshow(data[i,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
+                        axs[i].set_aspect("equal")
+                    else:
+                        if i*j<=data.shape[0]:
+                            #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
+                            im = axs[i,j].imshow(data[i*nx+j,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
+                            axs[i,j].set_aspect("equal")
 
         #if nx==1:
         #    fig.colorbar(im, ax=axs[-1])
@@ -1173,11 +1190,11 @@ class kernuller(object):
         return fig, axs
     
     
-    def plot_outputs_smart(self,matrix=None, inputfield=None, nx=4,ny=None,legendoffset=(1.6,0.5),
-                       verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.25,0.25), onlyonelegend=True,
+    def plot_outputs_smart(self,matrix=None, inputfield=None, base_preoffset=None, nx=4,ny=None,legendoffset=(1.6,0.5),
+                       verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.3,0.4), onlyonelegend=True,
                        labels=True, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
                        out_label=None, rmax=None, show=True, onlyoneticklabel=True, labelsize=15,
-                       rlabelpos=20, autorm=True, plotter=plotitem_arrow):
+                       rlabelpos=20, autorm=True, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False):
         """
         Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
         returns a fig, and  axs objects.
@@ -1239,6 +1256,8 @@ class kernuller(object):
             text_coords="data"
         if rmax is None:    
             rmax=np.max(matrix)
+        if base_preoffset is None:
+            base_preoffset = np.zeros_like(matrix)
         
         fig, axs = plt.subplots(ny,nx,sharex=sharex, sharey=sharey,
                                 gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
@@ -1251,18 +1270,31 @@ class kernuller(object):
                     addlabel=False
                 else:
                     addlabel=True
+                
+                #Plotting the output result (black stuff) on the bottom!
+                if (outvec is not None) and ((i*nx+j)<matrix.shape[0]) and not outputontop:
+                    plotted=[]
+                    baseoffset = 0
+                    item = outvec[i*nx+j]
+                    plotted = plotter(axs, item, plotted, nx, i, j, "black", verbose=verbose,
+                                           osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
+                                           linestyle="-", label="Output "+str(i), labels=addlabel,
+                                           projection=projection, rmax=rmax, addring=True, zorder=1)
+                    
+                    
+                    
                 plotted = []
                 adjust=[]
                 for k in range(matrix.shape[1]):
                     if (i*nx+j)<matrix.shape[0]:
-                        item = matrix[i*nx+j,k]
-                        baseoffset = 0
+                        item = matrix[i*nx+j,k] # base_preoffset[i*nx+j,k]
+                        baseoffset = base_preoffset[i*nx+j,k]
                         if item==0:
                             continue
                         #Here we use plotter, the optional function for plotting vectors
                         plotted = plotter(axs, item, plotted, nx, i, j, k, verbose=verbose,
-                                           osfrac=osfrac, baseoffset=baseoffset,
-                                           linestyle="-", label=str(k), labels=addlabel,
+                                           osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
+                                           linestyle="-", label="Input "+str(k), labels=addlabel,
                                            projection=projection, rmax=rmax)
                 
                 plotted2 = []
@@ -1278,31 +1310,18 @@ class kernuller(object):
                             plotted = plotitem(axs, item, plotted2, nx, i, j, k,
                                            osfrac=osfrac, baseoffset=baseoffset,
                                            linestyle="--", label=None, labels=False,
-                                           projection=projection, rmax=rmax, linewidth=2)
+                                           projection=projection, rmax=rmax, linewidth=3, zorder=0)
                 #Plotting the output result (black stuff)
-                if (outvec is not None) and ((i*nx+j)<matrix.shape[0]):
-                    if nx==1:
-                        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-                        axs[i].plot([np.angle(outvec[i]),np.angle(outvec[i])], [0,np.abs(outvec[i])],
-                                      color="k", linewidth=5,
-                                      linestyle="-", label=label)
-                        axs[i].set_aspect("equal")
-                        axs[i].set_ylim(0,rmax)
-                        thetas = np.linspace(0,2*np.pi,100)
-                        axs[i].plot(thetas, np.ones_like(thetas)*np.abs(outvec[i]),
-                                      color="k")
-
-                    else:
-
-                        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-                        axs[i,j].plot([0,np.angle(outvec[i*nx+j])], [0,np.abs(outvec[i*nx+j])],
-                                      color="k", linewidth=5,
-                                      linestyle="-", label="output")
-                        axs[i,j].set_aspect("equal")
-                        axs[i,j].set_ylim(0,rmax)
-                        thetas = np.linspace(0,2*np.pi,100)
-                        axs[i,j].plot(thetas, np.ones_like(thetas)*np.abs(outvec[i*nx+j]),
-                                      color="k")
+                if (outvec is not None) and ((i*nx+j)<matrix.shape[0]) and outputontop:
+                    print("we do plot on top")
+                    baseoffser = 0
+                    plotted=[]
+                    item = outvec[i*nx+j]
+                    plotted = plotter(axs, item, plotted, nx, i, j, "black", verbose=verbose,
+                                           osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
+                                           linestyle="-", label="Output", labels=addlabel,
+                                           projection=projection, rmax=rmax, addring=True, zorder=4)
+                    
                 
                     
                 if legend:
@@ -1345,21 +1364,31 @@ class kernuller(object):
             rowstoremove = np.zeros(matrix.shape[0], dtype=np.bool)
         else :
             rowstoremove = autorm
+        #Making a pretty legend for the phase term
         xT = np.arange(0, 2*np.pi,np.pi/4)
-        xL=['0',r'$\frac{\pi}{4}$',r'$\frac{\pi}{2}$',r'$\frac{3\pi}{4}$',\
-                r'$\pi$',r'$\frac{5\pi}{4}$',r'$\frac{3\pi}{2}$',r'$\frac{7\pi}{4}$']
+        #xL=['0',r'$\frac{\pi}{4}$',r'$\frac{\pi}{2}$',r'$\frac{3\pi}{4}$',\
+        #        r'$\pi$',r'$\frac{5\pi}{4}$',r'$\frac{3\pi}{2}$',r'$\frac{7\pi}{4}$']
         #xL=['0',r'$\pi/4$',r'$\pi/2$',r'$3\pi/4$',\
         #        r'$\pi$',r'$5\pi/4$',r'$3\pi/2}$',r'$7\pi/4$']
+        xT = np.arange(0, 2*np.pi,np.pi/2)
+        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2}$']
+        #copying teh ytick labels from the first plot
+        #yT = np.linspace(0,0.75*rmax.real,3).round(decimals=1)[1:]
+        #yL = [str(yT[b]) for b in np.arange(yT.shape[0])]
         removeticklabels = np.zeros_like(rowstoremove)
         if onlyoneticklabel:
             removeticklabels = np.ones_like(rowstoremove)
             removeticklabels[-nx] = 0
-        #print("removing the labels:", removeticklabels)
+        print("removing the labels:", removeticklabels)
         #print("removing the rows:", rowstoremove)
+        
         for i in np.flip(np.arange(matrix.shape[0])):
             
             fig.axes[i].set_xticks(xT)
             fig.axes[i].set_xticklabels(xL)
+            #fig.axes[i].set_rgrids(yT,yL)
+            fig.axes[i].yaxis.set_tick_params(labelbottom=True)
+                
             fig.axes[i].set_rlabel_position(rlabelpos)
             fig.axes[i].tick_params(labelsize=labelsize)
             #print("adding labels",xL)
@@ -1373,7 +1402,7 @@ class kernuller(object):
             if title is None:
                 title = "The null configurations\n of all the %d outputs"%(matrix.shape[0])
             fig.suptitle(title)
-        #fig.tight_layout()
+        fig.tight_layout()
         if show:
             plt.show()
         return fig, axs
@@ -1381,7 +1410,7 @@ class kernuller(object):
 
     
     
-    def plot_pupils(self, offset=5, s=20, marginratio=2., title=None, plotcircle=False, circlestyle=None):
+    def plot_pupils(self, offset=5, s=20, marginratio=2., title=None, plotcircle=False, circlestyle=None, figsize=None):
         """
         Plots a map of the pupil based on self.pups.
         offset     : The offset for the label of each pupil
@@ -1390,11 +1419,12 @@ class kernuller(object):
         marginratio: The ratio of offset to use to padd the map (use if labels are out of the map)
         plotcircle : radius and angles to plot a circle representing the size of the pupil
         circlestyle: the format string for the plotting of the circle
+        figsize    : The figsize to pass to plt.figure()
         
         """
         if title is None:
             title = "A map of the interferometer"
-        a = plt.figure()
+        a = plt.figure(figsize=figsize)
         for i in range(self.pups.shape[0]):
             plt.scatter(self.pups[i,0], self.pups[i,1], marker="o", s=s)
             plt.text(self.pups[i,0]+offset, self.pups[i,1]+offset,i)
