@@ -11,6 +11,8 @@ import copy
 
 from itertools import combinations, permutations
 
+from IPython.core.debugger import set_trace
+
 
 coeff = 1/sp.sqrt(2)
 def ph_shifter(phi):
@@ -154,7 +156,7 @@ def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
     return plotted
 
 def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
-             baseoffset=0, linestyle="-", label="X", linewidth=0.025,
+             baseoffset=0, linestyle="-", label="X", linewidth=0.025,flat=False,
              labels=True, projection="polar", rmax=1., addring=False, zorder=1):
     """
     A function that serves as a macro to plot the complex amplitude vectord for CMP
@@ -209,7 +211,7 @@ def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
         b1=np.imag(item)
         a2=np.real(offset)
         b2=np.imag(offset)
-    if nx==1:
+    if flat:
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
         axs[i].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
                       color=thecolor, width=linewidth, headlength=2.5, headaxislength=2.2,
@@ -1193,8 +1195,9 @@ class kernuller(object):
     def plot_outputs_smart(self,matrix=None, inputfield=None, base_preoffset=None, nx=4,ny=None,legendoffset=(1.6,0.5),
                        verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.3,0.4), onlyonelegend=True,
                        labels=True, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
-                       out_label=None, rmax=None, show=True, onlyoneticklabel=True, labelsize=15,
-                       rlabelpos=20, autorm=True, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False):
+                       out_label=None, rmax=None, show=True, onlyoneticklabel=False, labelsize=15,
+                       rlabelpos=20, autorm=True, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False,
+                       thealpha=0.1, color=("black", "silver"), outlabelloc=None):
         """
         Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
         returns a fig, and  axs objects.
@@ -1214,6 +1217,7 @@ class kernuller(object):
         title    : A title for the whole figure: either the title string, a None object (use default title) or a False boolean (no title).
         projection: if "polar" will use polar plots
         out_label: colored labels for each of the output plot. Requires an array corresponding to each row of the matrix.
+        thealpha : Alpha for output label box
         rmax     : The outer limit of the plot (max amplitude)
         show     : Whether to plt.show the figure at the end.
         onlyoneticklabel: Remove tick labels for all but the bottom left plots
@@ -1339,24 +1343,29 @@ class kernuller(object):
                             axs[i,j].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                             
                 if out_label is not None:
-                    if nx==1:
-                        axs[i,j].text(90., rmax, str(out_label[i]), size=15,
+                    #set_trace()
+                    if outlabelloc is None:
+                        outlabelloc = (1.18*np.pi/2,1.32*rmax)
+                    for idx, theax in enumerate(axs.flatten()):
+                        #print(theax)
+                        if color is None:
+                            edgecolor = "C"+str((idx)//2)
+                            facecolor = "C"+str((idx)//2)
+                        elif color is False:
+                            facecolor = "white"
+                            edgecolor = "black"
+                        else:
+                            edgecolor, facecolor = color
+
+                        theax.text(outlabelloc[0], outlabelloc[1], str(out_label[idx]), size=15,
                                 ha="right", va="top", 
-                                bbox=dict(boxstyle="square",
+                                bbox=dict(boxstyle="round",
                                 #facecolor="none",
-                                alpha=0.2,
-                                facecolor="C"+str((i)//2),
-                                edgecolor="C"+str((i)//2),
+                                alpha=thealpha,
+                                facecolor=facecolor,
+                                edgecolor=edgecolor,
                                 ))
-                    else :
-                        axs[i,j].text(np.pi/2, rmax, str(out_label[i*nx+j]), size=15,
-                                ha="right", va="top", 
-                                bbox=dict(boxstyle="square",
-                                #facecolor="none",
-                                alpha=0.2,
-                                facecolor="C"+str((i*nx+j)//2),
-                                edgecolor="C"+str((i*nx+j)//2),
-                                ))
+                    
         #eliminating the empty plots
         if autorm is True:
             rowstoremove = np.prod(matrix, axis=1) == 0
@@ -1439,6 +1448,7 @@ class kernuller(object):
         plt.gca().set_aspect("equal")
         if title:
             plt.title(title)
+        plt.tight_layout()
         plt.show()
         return a
 
