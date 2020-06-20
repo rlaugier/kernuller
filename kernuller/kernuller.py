@@ -88,7 +88,7 @@ def expected_numbers(Na):
     
     
     
-def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
+def plotitem(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
              baseoffset=0, linestyle="-", label="X", linewidth=5,
              labels=True, projection="polar", rmax=1.,zorder=1):
     """
@@ -134,29 +134,29 @@ def plotitem(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
         b2=np.imag(offset)
     if nx==1:
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-        axs[i].plot([a0,a1], [b0,b1],
+        axs[idx].plot([a0,a1], [b0,b1],
                       color="C"+str(k), linewidth=linewidth,
                       linestyle=linestyle, label=label, zorder=zorder)
         if labels:
             axs[i].text(0.95*a1, 0.9*b1, str(k))
-        axs[i].set_aspect("equal")
-        axs[i].set_ylim(0,rmax)
+        axs[idx].set_aspect("equal")
+        axs[idx].set_ylim(0,rmax)
 
     else:
 
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-        axs[i,j].plot([a0,a1], [b0,b1],
+        axs[idx].plot([a0,a1], [b0,b1],
                       color="C"+str(k), linewidth=linewidth,
                       linestyle=linestyle, label=label, zorder=zorder)
         if labels:
-            axs[i,j].text(0.95*a1, 0.9*b1, str(k))
-        axs[i,j].set_aspect("equal")
-        axs[i,j].set_ylim(0,rmax)
+            axs[idx].text(0.95*a1, 0.9*b1, str(k))
+        axs[idx].set_aspect("equal")
+        axs[idx].set_ylim(0,rmax)
     plotted.append(item)
     return plotted
 
-def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
-             baseoffset=0, linestyle="-", label="X", linewidth=0.025,flat=False,
+def plotitem_arrow(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
+             baseoffset=0, linestyle="-", label="X", linewidth=0.025,
              labels=True, projection="polar", rmax=1., addring=False, zorder=1):
     """
     A function that serves as a macro to plot the complex amplitude vectord for CMP
@@ -211,33 +211,33 @@ def plotitem_arrow(axs, item, plotted, nx, i, j,k, osfrac=0.1,verbose=False,
         b1=np.imag(item)
         a2=np.real(offset)
         b2=np.imag(offset)
-    if flat:
+    if nx==1:
         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-        axs[i].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
+        axs[idx].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
                       color=thecolor, width=linewidth, headlength=2.5, headaxislength=2.2,
                       linestyle=linestyle, label=label, zorder=zorder)
         if labels:
-            axs[i].text(0.95*a1, 0.9*b1, str(k))
-        axs[i].set_aspect("equal")
-        axs[i].set_ylim(0,rmax)
+            axs[idx].text(0.95*a1, 0.9*b1, str(k))
+        axs[idx].set_aspect("equal")
+        axs[idx].set_ylim(0,rmax)
         if addring:
             thetas = np.linspace(0,2*np.pi,100)
-            axs[i].plot(thetas, np.ones_like(thetas)*np.abs(item),
+            axs[idx].plot(thetas, np.ones_like(thetas)*np.abs(item),
                                       color=thecolor, zorder=zorder)
 
     else:
 
-        #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
-        axs[i,j].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
+        #axs[idx].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
+        axs[idx].quiver(a0, b0, a1, b1, scale_units='xy', angles='xy', scale=1,
                       color=thecolor, width=linewidth, headlength=2.5, headaxislength=2.2,
                       linestyle=linestyle, label=label, zorder=zorder)
         if labels:
-            axs[i,j].text(0.95*a1, 0.9*b1, str(k))
-        axs[i,j].set_aspect("equal")
-        axs[i,j].set_ylim(0,rmax)
+            axs[idx].text(0.95*a1, 0.9*b1, str(k))
+        axs[idx].set_aspect("equal")
+        axs[idx].set_ylim(0,rmax)
         if addring:
             thetas = np.linspace(0,2*np.pi,100)
-            axs[i,j].plot(thetas, np.ones_like(thetas)*np.abs(item),
+            axs[idx].plot(thetas, np.ones_like(thetas)*np.abs(item),
                                       color=thecolor, zorder=zorder)
     plotted.append(item+baseoffset)
     return plotted
@@ -1068,7 +1068,7 @@ class kernuller(object):
         return fig, axs
     
     def plot_response_maps(self,data, nx=1,ny=None, plotsize=2, cmap="coolwarm", extent=None,
-                          title="On-sky respnse maps", plotspaces=(0.2,0.2),
+                          title="On-sky respnse maps", plotspaces=(0.2,0.2),dpi=200,
                           unit="mas", cbar_label=None):
         """
         Plots a set of maps into a single figure. Produces a 2D grid of imshow plots showing the maps.
@@ -1095,7 +1095,7 @@ class kernuller(object):
         
         fig, axs = plt.subplots(ny,nx,sharex='col', sharey='row',
                                 gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
-                                figsize=(plotsize*nx,plotsize*ny +0.1), )
+                                figsize=(plotsize*nx,plotsize*ny +0.1), dpi=200)
         if ny == 1:
             im = axs.imshow(data[0,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
             axs.set_aspect("equal")
@@ -1266,23 +1266,22 @@ class kernuller(object):
         fig, axs = plt.subplots(ny,nx,sharex=sharex, sharey=sharey,
                                 gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
                                 figsize=(plotsize*nx,plotsize*matrix.shape[0]//nx+0.5),
-                                subplot_kw=dict(projection=projection))
+                                subplot_kw=dict(projection=projection), dpi=200)
         
-        for i in range(axs.shape[0]):
-            for j in range(nx):
-                if (i==0) or (not labels):
+        for idx, theax in enumerate(axs.flatten()):
+                if (idx==0) or (not labels):
                     addlabel=False
                 else:
                     addlabel=True
                 
                 #Plotting the output result (black stuff) on the bottom!
-                if (outvec is not None) and ((i*nx+j)<matrix.shape[0]) and not outputontop:
+                if (outvec is not None) and ((idx)<matrix.shape[0]) and not outputontop:
                     plotted=[]
                     baseoffset = 0
-                    item = outvec[i*nx+j]
-                    plotted = plotter(axs, item, plotted, nx, i, j, "black", verbose=verbose,
+                    item = outvec[idx]
+                    plotted = plotter(axs.flat, item, plotted, nx, idx, "black", verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
-                                           linestyle="-", label="Output "+str(i), labels=addlabel,
+                                           linestyle="-", label="Output "+str(idx), labels=addlabel,
                                            projection=projection, rmax=rmax, addring=True, zorder=1)
                     
                     
@@ -1290,13 +1289,13 @@ class kernuller(object):
                 plotted = []
                 adjust=[]
                 for k in range(matrix.shape[1]):
-                    if (i*nx+j)<matrix.shape[0]:
-                        item = matrix[i*nx+j,k] # base_preoffset[i*nx+j,k]
-                        baseoffset = base_preoffset[i*nx+j,k]
+                    if (idx)<matrix.shape[0]:
+                        item = matrix[idx,k] # base_preoffset[idx,k]
+                        baseoffset = base_preoffset[idx,k]
                         if item==0:
                             continue
                         #Here we use plotter, the optional function for plotting vectors
-                        plotted = plotter(axs, item, plotted, nx, i, j, k, verbose=verbose,
+                        plotted = plotter(axs.flat, item, plotted, nx, idx, k, verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
                                            linestyle="-", label="Input "+str(k), labels=addlabel,
                                            projection=projection, rmax=rmax)
@@ -1305,23 +1304,23 @@ class kernuller(object):
                 adjus2t = []
                 #Plotting the dashed lines for the matrix itself
                 for k in range(initialmatrix.shape[1]):
-                    if (i*nx+j)<initialmatrix.shape[0]:
-                        item = initialmatrix[i*nx+j,k]
+                    if (idx)<initialmatrix.shape[0]:
+                        item = initialmatrix[idx,k]
                         baseoffset = 0
                         if item==0:
                             continue
-                        if i != 0:#We just don't plot the reference for the bright
-                            plotted = plotitem(axs, item, plotted2, nx, i, j, k,
+                        if idx != 0:#We just don't plot the reference for the bright
+                            plotted = plotitem(axs.flat, item, plotted2, nx, idx, k,
                                            osfrac=osfrac, baseoffset=baseoffset,
                                            linestyle="--", label=None, labels=False,
                                            projection=projection, rmax=rmax, linewidth=3, zorder=0)
                 #Plotting the output result (black stuff)
-                if (outvec is not None) and ((i*nx+j)<matrix.shape[0]) and outputontop:
+                if (outvec is not None) and ((idx)<matrix.shape[0]) and outputontop:
                     print("we do plot on top")
                     baseoffser = 0
                     plotted=[]
-                    item = outvec[i*nx+j]
-                    plotted = plotter(axs, item, plotted, nx, i, j, "black", verbose=verbose,
+                    item = outvec[idx]
+                    plotted = plotter(axs.flat, item, plotted, nx, idx, "black", verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
                                            linestyle="-", label="Output", labels=addlabel,
                                            projection=projection, rmax=rmax, addring=True, zorder=4)
@@ -1329,18 +1328,11 @@ class kernuller(object):
                 
                     
                 if legend:
-                    if nx==1:
-                        if onlyonelegend:
-                            if i==0:
-                                axs[i].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
-                        else :
-                            axs[i].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
-                    else :
-                        if onlyonelegend:
-                            if i*nx+j ==0:
-                                axs[i,j].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
-                        else:
-                            axs[i,j].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
+                    if onlyonelegend:
+                        if idx ==0:
+                            axs.flat[idx].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
+                    else:
+                        axs.flat[idx].legend(loc=legendstring, prop={'size': legendsize}, bbox_to_anchor=legendoffset)
                             
                 if out_label is not None:
                     #set_trace()
@@ -1658,7 +1650,7 @@ def get_signature_fast(matrix, threshold=1e-8):
     return signature
 
 
-def pairwise_kernel(n):
+def pairwise_kernel(n, blankcols=False):
     """
     Returns a kernel for pairwise nullers. Enantiomorph nulls must be consecutive of each-other
     n :  The number of nulls (must be even)
@@ -1666,6 +1658,9 @@ def pairwise_kernel(n):
     kervec = np.zeros(n)
     kervec[:2] = np.array([1,-1])
     customker = np.array([np.roll(kervec,2*i) for i in range(kervec.shape[0]//2)])
+    if blankcols is not False:
+        theblanks = np.zeros((customker.shape[0], blankcols))
+        customker = np.hstack((theblanks, customker))
     return(customker)
 
 VLTI = np.array([[-9.925,-20.335],
