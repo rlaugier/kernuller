@@ -1069,7 +1069,7 @@ class kernuller(object):
     
     def plot_response_maps(self,data, nx=1,ny=None, plotsize=2, cmap="coolwarm", extent=None,
                           title="On-sky respnse maps", plotspaces=(0.2,0.2),dpi=200,
-                          unit="mas", cbar_label=None):
+                          unit="mas", cbar_label=None, central=False):
         """
         Plots a set of maps into a single figure. Produces a 2D grid of imshow plots showing the maps.
         
@@ -1095,7 +1095,7 @@ class kernuller(object):
         
         fig, axs = plt.subplots(ny,nx,sharex='col', sharey='row',
                                 gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
-                                figsize=(plotsize*nx,plotsize*ny +0.1), dpi=200)
+                                figsize=(plotsize*nx,plotsize*ny +0.1), dpi=dpi)
         if ny == 1:
             im = axs.imshow(data[0,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
             axs.set_aspect("equal")
@@ -1106,11 +1106,15 @@ class kernuller(object):
 
                         #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
                         im = axs[i].imshow(data[i,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
+                        if central is not False:
+                            axs[i].scatter(0,0, marker=central[0], c=central[1])
                         axs[i].set_aspect("equal")
                     else:
                         if i*j<=data.shape[0]:
                             #axs[i,j].scatter(matrix[i*nx+j,k].real, matrix[i*nx+j,k].imag)
                             im = axs[i,j].imshow(data[i*nx+j,:,:], vmin=gmin, vmax=gmax, cmap=cmap, extent=extent)
+                            if central is not False:
+                                axs[i,j].scatter(0,0, marker=central[0], c=central[1])
                             axs[i,j].set_aspect("equal")
 
         #if nx==1:
@@ -1124,11 +1128,10 @@ class kernuller(object):
         plt.xlabel("On-sky RA position (%s)"%(unit))
         plt.ylabel("On-sky DEC position (%s)"%(unit))
         fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+        cbar_ax = fig.add_axes([0.80, 0.15, 0.05, 0.7])
         cbar = fig.colorbar(im, cax=cbar_ax)
         if cbar_label is not None:
             cbar.set_label(cbar_label)
-        
 
         return fig, axs
     
@@ -1197,7 +1200,7 @@ class kernuller(object):
                        labels=True, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
                        out_label=None, rmax=None, show=True, onlyoneticklabel=False, labelsize=15,
                        rlabelpos=20, autorm=True, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False,
-                       thealpha=0.1, color=("black", "silver"), outlabelloc=None):
+                       thealpha=0.1, color=("black", "silver"), outlabelloc=None, dpi=200):
         """
         Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
         returns a fig, and  axs objects.
@@ -1266,7 +1269,7 @@ class kernuller(object):
         fig, axs = plt.subplots(ny,nx,sharex=sharex, sharey=sharey,
                                 gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
                                 figsize=(plotsize*nx,plotsize*matrix.shape[0]//nx+0.5),
-                                subplot_kw=dict(projection=projection), dpi=200)
+                                subplot_kw=dict(projection=projection), dpi=dpi)
         
         for idx, theax in enumerate(axs.flatten()):
                 if (idx==0) or (not labels):
@@ -1411,7 +1414,8 @@ class kernuller(object):
 
     
     
-    def plot_pupils(self, offset=5, s=20, marginratio=2., title=None, plotcircle=False, circlestyle=None, figsize=None):
+    def plot_pupils(self, offset=5, s=20, marginratio=2., title=None, plotcircle=False, circlestyle=None,
+                    showlegend=False, figsize=None, pupil_indices=True, show=True):
         """
         Plots a map of the pupil based on self.pups.
         offset     : The offset for the label of each pupil
@@ -1427,8 +1431,12 @@ class kernuller(object):
             title = "A map of the interferometer"
         a = plt.figure(figsize=figsize)
         for i in range(self.pups.shape[0]):
-            plt.scatter(self.pups[i,0], self.pups[i,1], marker="o", s=s)
-            plt.text(self.pups[i,0]+offset, self.pups[i,1]+offset,i)
+            plt.scatter(self.pups[i,0], self.pups[i,1], marker="o", s=s, label="Input "+str(i))
+            if pupil_indices is not False:
+                if pupil_indices is True:
+                    plt.text(self.pups[i,0]+offset, self.pups[i,1]+offset,i)
+                else:
+                    plt.text(self.pups[i,0]+offset, self.pups[i,1]+offset, pupil_indices[i])
         if plotcircle:
             plt.plot(plotcircle[0]*np.cos(plotcircle[1]), plotcircle[0]*np.sin(plotcircle[1]),circlestyle)
         else:
@@ -1436,12 +1444,15 @@ class kernuller(object):
             plt.ylim(np.min(self.pups[:,1])-marginratio*offset, np.max(self.pups[:,1])+marginratio*offset)
         plt.xlabel("East position (m)")
         plt.ylabel("North position (m)")
+        if showlegend:
+            plt.legend()
         
         plt.gca().set_aspect("equal")
         if title:
             plt.title(title)
         plt.tight_layout()
-        plt.show()
+        if show:
+            plt.show()
         return a
 
     def find_valid_nulls(self, params, nit=100):
