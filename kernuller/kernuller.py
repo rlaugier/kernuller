@@ -1128,7 +1128,7 @@ class kernuller(object):
         plt.xlabel("On-sky RA position (%s)"%(unit))
         plt.ylabel("On-sky DEC position (%s)"%(unit))
         fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([0.80, 0.15, 0.05, 0.7])
+        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
         cbar = fig.colorbar(im, cax=cbar_ax)
         if cbar_label is not None:
             cbar.set_label(cbar_label)
