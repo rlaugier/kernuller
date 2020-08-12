@@ -76,15 +76,15 @@ def expected_numbers(Na):
     Nn = Na -1
     Nbl = np.math.factorial(Na)/\
         (np.math.factorial(2)*np.math.factorial(Na-2))
-    print(Nbl, "baselines")
+    print("Baselines", Nbl)
     Nderivatives = Nn + np.math.factorial(Nn)/\
                 (np.math.factorial(2)*np.math.factorial(Nn-2))
-    print(Nderivatives, "second order derivatives")
+    print("Number of second order derivatives", Nderivatives)
     Nnulls = np.math.factorial(Nn)
-    print(Nnulls, "Number of nulls")
+    print("Number of nulls", Nnulls)
     Nthk = Nbl - (Na - 1)
-    print(Nthk, "robust observables")
-    print(Nthk*2, "independant nulls")
+    print("Independant nulls", Nthk*2)
+    print("Robust observables", Nthk)
     
     
     
@@ -1600,7 +1600,7 @@ def generative_from_recipe(matrix, recipe):
     it = 0
     nbad = 0
     picks = []
-    for pick in recipes[0]  :
+    for pick in recipe  :
         #pick = np.random.randint(0, runningmat.shape[0])
         #Warning: non idempotent code below!! (because of row_del)
         arow = runningmat[pick,:]
