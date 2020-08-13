@@ -57,6 +57,25 @@ def printlatex(symbolic, imaginary_unit="j"):
     prefix = "\\begin{equation}\n  "
     suffix = "\n\end{equation}"
     print(prefix + sp.latex(symbolic, imaginary_unit=imaginary_unit) + suffix, file=sys.stdout)
+    
+def fprint(expr, expr2=None):
+    """
+    Force the pretty display of an expression
+    Only woks in IPython and notebooks!
+    expr : Sympy expression
+    expr2 : rstring Containing stuff to put before an equal sign (optional)
+    """
+    try :
+        from IPython.display import Math, display
+        import sympy as sy
+        if expr2 is not None:
+            display(Math( expr2 + sp.latex(expr)))
+        else :
+            display(Math(sp.latex(expr)))
+    except:
+        pprint(expr2)
+        pprint(expr)
+        
 
 def pol2cart(rho, theta):
     """
@@ -73,6 +92,7 @@ def expected_numbers(Na):
     Na number of apertures (assumed to be non-redundant)
     """
     print("Assuming nonredundant baselines")
+    Nas = sp.symbols("n_a")
     Nn = Na -1
     Nbl = np.math.factorial(Na)/\
         (np.math.factorial(2)*np.math.factorial(Na-2))
@@ -83,8 +103,31 @@ def expected_numbers(Na):
     Nnulls = np.math.factorial(Nn)
     print("Number of nulls", Nnulls)
     Nthk = Nbl - (Na - 1)
+    Nthks = (Nas - 1) * (Nas - 2) / 2
     print("Independant nulls", Nthk*2)
+    fprint(Nthk *2 , r"N_{null, indep} = ")
     print("Robust observables", Nthk)
+    fprint(Nthk , r"N_{kernels, indep} = ")
+    
+    al_bright = 1/np.sqrt(Na)
+    
+    als_bright = 1 / sp.sqrt(Nas)
+    als_orig = als_bright * sp.sqrt((Nas-1) / sp.factorial(Nas - 1))
+    als_cropped = als_bright * sp.sqrt((Nas-1) / (2*Nthks))
+    
+    fprint(als_bright , r"a_{l, bright} = ")
+    fprint(als_orig , r"a_{l, full} = ")
+    fprint(als_orig.subs(Nas, Na), r"a_{l, full} = ")
+    print("Assuming cropping for full signal of non-redundant array:")
+    fprint(als_cropped , r"a_{l, cropped} = ")
+    fprint(als_cropped.subs(Nas, Na), r"a_{l, cropped} = ")
+    
+    Nns = sp.symbols("n_n")
+    I_peak = Nas * (Nas - 1)/ Nns
+    I_peak2 = I_peak.subs(Nns, 2 * Nthks)
+    fprint(I_peak, r"I_{peak} = ")
+    fprint(I_peak2.subs(Nas,Na), r"I_{peak} = ")
+    
     
     
     
