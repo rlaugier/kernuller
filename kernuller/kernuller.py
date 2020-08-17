@@ -37,7 +37,7 @@ def rad2mas(x):
     '''  convert radians to mas'''
     return(x / 4.8481368110953599e-09) # = x / (np.pi/(180*3600*1000))
 
-def sp2np(mat, dtype=np.complex128):
+def sp2np(S, dtype=np.complex128):
     """
     A quick function to convert a sympy complex matrix into numpy.
     
@@ -58,7 +58,7 @@ def printlatex(symbolic, imaginary_unit="j"):
     suffix = "\n\end{equation}"
     print(prefix + sp.latex(symbolic, imaginary_unit=imaginary_unit) + suffix, file=sys.stdout)
     
-def fprint(expr, expr2=None):
+def fprint(expr, expr2=None, imaginary_unit="j"):
     """
     Force the pretty display of an expression
     Only woks in IPython and notebooks!
@@ -69,12 +69,12 @@ def fprint(expr, expr2=None):
         from IPython.display import Math, display
         import sympy as sy
         if expr2 is not None:
-            display(Math( expr2 + sp.latex(expr)))
+            display(Math( expr2 + sp.latex(expr, imaginary_unit=imaginary_unit)))
         else :
-            display(Math(sp.latex(expr)))
+            display(Math(sp.latex(expr,imaginary_unit=imaginary_unit)))
     except:
-        pprint(expr2)
-        pprint(expr)
+        sp.pprint(expr, imaginary_uni=imaginary_unit)
+        sp.pprint(expr, imaginary_uni=imaginary_unit)
         
 
 def pol2cart(rho, theta):
