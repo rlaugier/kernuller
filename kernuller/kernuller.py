@@ -532,7 +532,7 @@ class kernuller(object):
             sepcartrad = mas2rad(sepcart)#The separation of the compag in radians
             piston_shifts = self.pups.dot(sepcartrad) 
             phi = 2 * np.pi * piston_shifts / self.wl
-            comp = 1 / binary[2] * np.exp(1j*phi)
+            comp = amp / binary[2] * np.exp(1j*phi)
             E = np.vstack((E,comp))
         return E
     

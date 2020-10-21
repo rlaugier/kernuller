@@ -4,6 +4,8 @@ from . import kernel_cm
 from .kernel_cm import br, bo, vdg, bbr
 from . import interferometers
 from .interferometers import CHARA, VLTI, redarray
+from . import diagrams
+from .diagrams import plot_outputs_smart
 #from .detection_maps import detection_maps as dmap
 
 
