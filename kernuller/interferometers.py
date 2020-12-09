@@ -7,6 +7,8 @@ import astropy.units as u
 import astropy.coordinates
 from pathlib import Path
 
+resource_path = Path(__file__).parent / "data"
+
 #VLTI layout
 
 VLTI_stations = list(["U1", "U2", "U3", "U4"])
@@ -14,6 +16,9 @@ VLTI = np.array([[-9.925,-20.335],
                     [14.887,30.502],
                     [44.915,66.183],
                     [103.306,44.999]])
+VLTI_AT_small = np.load(resource_path.joinpath("vlti_at_small"))[:,:-1]
+VLTI_AT_medium = np.load(resource_path.joinpath("vlti_at_medium"))[:,:-1]
+VLTI_AT_large = np.load(resource_path.joinpath("vlti_at_large"))[:,:-1]
 
 #A redundant array
 
@@ -25,7 +30,6 @@ redarray = np.array([[0,0],
                     [100,200]])
 
 #The CHARA array.
-resource_path = Path(__file__).parent / "data"
 telcoords = resource_path.joinpath("chara.dat").read_text()
 #telcoords = open(__name__).read()
 telcoords = telcoords.split("\n\n")
