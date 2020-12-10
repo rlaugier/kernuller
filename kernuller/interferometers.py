@@ -16,9 +16,9 @@ VLTI = np.array([[-9.925,-20.335],
                     [14.887,30.502],
                     [44.915,66.183],
                     [103.306,44.999]])
-VLTI_AT_small = np.load(resource_path.joinpath("vlti_at_small"))[:,:-1]
-VLTI_AT_medium = np.load(resource_path.joinpath("vlti_at_medium"))[:,:-1]
-VLTI_AT_large = np.load(resource_path.joinpath("vlti_at_large"))[:,:-1]
+VLTI_AT_small = np.load(resource_path.joinpath("vlti_at_small.npy"))[:,:-1]
+VLTI_AT_medium = np.load(resource_path.joinpath("vlti_at_medium.npy"))[:,:-1]
+VLTI_AT_large = np.load(resource_path.joinpath("vlti_at_large.npy"))[:,:-1]
 
 #A redundant array
 
