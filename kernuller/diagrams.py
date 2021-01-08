@@ -164,12 +164,12 @@ def plotitem_arrow(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
     return plotted
 
 
-def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=4,ny=None,legendoffset=(1.6,0.5),
-                       verbose=False, osfrac=0.1, plotsize=2, plotspaces=(0.3,0.4), onlyonelegend=True,
-                       labels=True, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
+def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,ny=None,legendoffset=(-0.2,0),#(1.6,0.5),
+                       verbose=False, osfrac=0.1, plotsize=3, plotspaces=(0.3,0.4), onlyonelegend=False,
+                       labels=False, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
                        out_label=None, rmax=None, show=True, onlyoneticklabel=False, labelsize=15,
-                       rlabelpos=20, autorm=True, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False,
-                       thealpha=0.1, color=("black", "silver"), outlabelloc=None, dpi=200):
+                       rlabelpos=20, autorm=False, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False,
+                       thealpha=0.1, color=("black", "silver"), outlabelloc=None, dpi=100):
         """
         Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
         returns a fig, and  axs objects.

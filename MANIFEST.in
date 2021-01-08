@@ -6,4 +6,7 @@ include kernuller/data/5T_matrices.npy
 include kernuller/data/6T_matrices.npy
 include kernuller/data/5T_recipes.npy
 include kernuller/data/6T_recipes.npy
+include kernuller/data/vlti_at_large.npy
+include kernuller/data/vlti_at_medium.npy
+include kernuller/data/vlti_at_small.npy
 include setup.py

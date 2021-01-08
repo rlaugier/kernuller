@@ -1,9 +1,8 @@
 
-print("Loading observatory tool")
+#print("Loading observatory tool")
 
 import numpy as np
 import sympy as sp
-import xara
 
 
 from astropy.time import Time
@@ -43,12 +42,17 @@ class observatory(object):
         self.statlocs = statlocs
         
         self.theta = sp.symbols("self.theta")
+        #R handles the azimuthal rotation
         self.Rs = sp.Matrix([[sp.cos(self.theta), sp.sin(self.theta)],
                        [-sp.sin(self.theta), sp.cos(self.theta)]])
         self.R = sp.lambdify(self.theta, self.Rs, modules="numpy")
+        #P handles the projection due to elevation rotation
         self.Ps = sp.Matrix([[1, 0],
                        [0, sp.sin(self.theta)]])
         self.P = sp.lambdify(self.theta, self.Ps, modules="numpy")
+        #C handles the piston due to elevation.
+        self.Cs = sp.Matrix([[1, sp.cos(self.theta)]])
+        self.C = sp.lambdify(self.theta, self.Cs, modules="numpy")
 
         
     def build_observing_sequence(self, times=["2020-04-13T00:00:00","2020-04-13T10:30:00"],
@@ -101,11 +105,26 @@ class observatory(object):
         taraltaz : the astropy.coordinates.AltAz of the target
         """
         arrayaz = self.R((taraltaz.az.value - 180)*np.pi/180).dot(self.statlocs.T).T
-        newarray = self.P(taraltaz.alt.value*np.pi/180).dot(arrayaz.T).T
+        newarray = self.P(taraltaz.alt.value * np.pi/180).dot(arrayaz.T).T
         if self.verbose:
             print("=== AltAz position:")
             print("az", taraltaz.az.value -180)
             print("alt", taraltaz.alt.value)
             print("old array", self.statlocs)
             pritn("new array", newarray)
+        return newarray
+    def get_projected_geometric_pistons(self, taraltaz):
+        """
+        Returns the geomtric piston resutling from the pointing
+        of the array.
+        taraltaz : the astropy.coordinates.AltAz of the target
+        """
+        arrayaz = self.R((taraltaz.az.value - 180)*np.pi/180).dot(self.statlocs.T).T
+        pistons = self.R(taraltaz.alt.value * np.pi/180).dot(arrayaz.T).T
+        if self.verbose:
+            print("=== AltAz position:")
+            print("az", taraltaz.az.value -180)
+            print("alt", taraltaz.alt.value)
+            print("old array", self.statlocs)
+            pritn("new array", pistons)
         return newarray
