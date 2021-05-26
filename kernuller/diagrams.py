@@ -4,9 +4,33 @@ import sympy as sp
 
 #from IPython.core.debugger import set_trace
 
+# Some colormaps chosen to mirror the default (Cx) series of colors
+colortraces = [plt.matplotlib.cm.Blues,
+              plt.matplotlib.cm.YlOrBr, # This in order to use oranges for the brouwns
+              plt.matplotlib.cm.Greens,
+              plt.matplotlib.cm.Reds,
+              plt.matplotlib.cm.Purples,
+              plt.matplotlib.cm.Oranges,
+              plt.matplotlib.cm.RdPu,
+              plt.matplotlib.cm.Greys,
+              plt.matplotlib.cm.YlOrRd,
+              plt.matplotlib.cm.GnBu]
 
 
-
+def lambdifyz(symbols, expr, modules="numpy"):
+    """
+    Circumvents a bug in lambdify where silent 
+    variables will be simplified and therefore
+    aren't broadcasted. https://github.com/sympy/sympy/issues/5642
+    Use an extra argument = 0 when calling
+    """
+    assert isinstance(expr, sp.Matrix)
+    z = sp.symbols("z")
+    thesymbols = list(symbols)
+    thesymbols.append(z)
+    exprz = expr + z*sp.prod(symbols)*sp.ones(expr.shape[0], expr.shape[1])
+    fz = sp.lambdify(thesymbols, exprz, modules=modules)
+    return fz
 
 
 def plotitem(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
@@ -370,4 +394,143 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
         fig.tight_layout()
         if show:
             plt.show()
+        return fig, axs
+
+
+####################################
+# For plotting chromatic combiners
+
+
+from pdb import set_trace
+def plot_trace(axis, item, wl, cmap, label=None, verbose=False, msize=10.,
+              rmax=None, cbar_ax=None, k=None,minfrac=0.9, maxfrac=None, **kwargs):
+    r = np.abs(item)
+    phi = np.angle(item)
+    if verbose:
+        print("r", r)
+        print("phi", phi)
+        print("c", c)
+    if maxfrac is None:
+        maxfrac=1.
+    if minfrac is None:
+        minfrac=1.
+    cmin = minfrac * np.min(wl)
+    cmax = maxfrac * np.max(wl)
+    axis.scatter(phi, r, label=label, c=wl, cmap=cmap,
+                 vmin=cmin, vmax=cmax, **kwargs)
+    axis.set_aspect("equal")
+    axis.set_ylim(0,rmax)
+    if cbar_ax is not None:
+        cbar_ax.scatter(wl, k*np.ones_like(wl), c=wl, cmap=cmap,
+                        vmin=cmin, vmax=cmax, **kwargs)
+    
+    
+    
+    
+    
+    
+    
+    
+def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.2,0),#(1.6,0.5),
+               verbose=False, plotsize=3, plotspaces=(0.3,0.4),
+               plotout=False,minfrac=None,maxfrac=None,
+               labels=False, legend=True,legendsize=8, legendstring="center left", title=None,
+               out_label=None, rmax=None, show=True, labelsize=15,colors=colortraces,
+               rlabelpos=20, autorm=False, plotter=plot_trace,
+               mainlinewidth=0.04, outputontop=True, msize=10,
+               thealpha=0.5, color=("black", "silver"), outlabelloc=None, dpi=100,
+               returnmatrix=False):
+        matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
+        broacasted = matfunction(wlpoints, 0)
+        #matfunction = lambdify_void_mat((lamb,), amatrix, modules="numpy")
+        #broacasted = matfunction(wlpoints)#.astype(np.complex128)
+        matrix = np.moveaxis(broacasted, 2, 0)
+        if verbose:print(matrix)
+        if ny is None:
+            ny = matrix.shape[1]//nx
+        if matrix.shape[1]%nx != 0:
+            ny = ny +1
+        ntot = matrix.shape[2]
+        
+        projection = "polar"
+        sharex="none"
+        sharey="all"
+        text_coords="polar"
+        if rmax is None:    
+            rmax=np.max(np.abs(matrix))
+        
+        fsize = (plotsize*nx,plotsize*matrix.shape[1]//nx+0.5)
+        print(fsize)
+        
+        fig, axs = plt.subplots(ny,nx,sharex=sharex, sharey=sharey,
+                                gridspec_kw={'hspace': plotspaces[0], 'wspace': plotspaces[1]},
+                                figsize=fsize,
+                                subplot_kw=dict(projection="polar"), dpi=dpi)
+        
+        fig.subplots_adjust(top=0.9)
+        cbar_ax = fig.add_axes([0.05, 0.95, 0.9, 0.1])
+        plt.xlabel("Wavelength [m]")
+        plt.ylabel("Input index (Grey + is output)")
+        
+        if plotout is not False:
+            if isinstance(plotout, sp.Matrix):
+                inarray = plotout
+            else:
+                inarray = sp.ones(amatrix.shape[1],1)
+            output = amatrix@inarray
+            out_matfunction = lambdifyz((lamb,), output, modules="numpy")
+            out_broacasted = out_matfunction(wlpoints, 0)
+            #out_matfunction = lambdify_void_mat((lamb,), output, modules="numpy")
+            #out_broacasted = out_matfunction(wlpoints)
+            #out_matfunction = ufuncify(lamb, output, backend="numpy")
+            #out_broacasted = out_matfunction(wlpoints)
+            
+            out_vector =  np.moveaxis(out_broacasted, 2, 0)
+            for idx, theax in enumerate(axs.flatten()):
+                item = out_vector[:,idx]
+                #print(item)
+                plotted = plotter(theax, item, wlpoints,
+                                  cmap="Greys",
+                                  label="Output "+str(idx),
+                                  verbose=verbose,msize=msize, rmax=rmax,
+                                  cbar_ax=cbar_ax, k=ntot, alpha=thealpha,
+                                  marker="+", s=100.,
+                                  minfrac=minfrac,
+                                  maxfrac=maxfrac)
+        
+        for idx, theax in enumerate(axs.flatten()):
+            plotted = []
+            for k in range(matrix.shape[2]):
+                if (idx)<matrix.shape[1]:
+                    item = matrix[:,idx,k] # base_preoffset[idx,k]
+                    cmap = colors[k]
+                    if verbose: print(item)
+                    if not np.allclose(item, 0): #Avoid plotting 0 elements
+                        #Here we use plotter, the optional function for plotting vectors
+                        plotted = plotter(axs.flat[idx], item, wlpoints, cmap=cmap, label="Input "+str(k),
+                                           verbose=verbose,msize=msize, rmax=rmax,
+                                           cbar_ax=cbar_ax, k=k,
+                                           alpha=thealpha,
+                                           minfrac=minfrac,
+                                           maxfrac=maxfrac)
+            #axs.flat[idx].legend(loc=legendstring,
+            #                     prop={'size': legendsize},
+            #                     bbox_to_anchor=legendoffset)
+        
+
+        
+        xT = np.arange(0, 2*np.pi,np.pi/2)
+        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2}$']
+        for i in np.flip(np.arange(matrix.shape[1])):
+            
+            fig.axes[i].set_xticks(xT)
+            fig.axes[i].set_xticklabels(xL)
+            #fig.axes[i].set_rgrids(yT,yL)
+            fig.axes[i].yaxis.set_tick_params(labelbottom=True)
+                
+            fig.axes[i].set_rlabel_position(rlabelpos)
+            fig.axes[i].tick_params(labelsize=labelsize)
+            #print("adding labels",xL)
+        if returnmatrix:
+            return fig, axs, matrix
         return fig, axs
