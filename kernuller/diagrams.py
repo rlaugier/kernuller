@@ -126,7 +126,7 @@ def plotitem_arrow(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
     """
     
     offset = osfrac*np.abs(item)*np.exp(1j*(np.angle(item)+np.pi/2))
-    if k is "black":
+    if k == "black":
         thecolor = "k"
     else:
         thecolor = "C"+str(k)
