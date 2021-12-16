@@ -9,4 +9,9 @@ include kernuller/data/6T_recipes.npy
 include kernuller/data/vlti_at_large.npy
 include kernuller/data/vlti_at_medium.npy
 include kernuller/data/vlti_at_small.npy
+include kernuller/data/3T_matrices_p4.pickle/
+include kernuller/data/4T_matrices_p4.pickle/
+include kernuller/data/5T_matrices_p4.pickle/
+include kernuller/data/6T_matrices_p4.pickle/
+include kernuller/nullers.py
 include setup.py

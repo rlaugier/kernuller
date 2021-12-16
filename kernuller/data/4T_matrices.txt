@@ -1,0 +1,8 @@
+[Matrix([
+[      1/2,          1/2,          1/2,          1/2],
+[sqrt(2)/4, -sqrt(2)*I/4,   -sqrt(2)/4,  sqrt(2)*I/4],
+[sqrt(2)/4,  sqrt(2)*I/4,   -sqrt(2)/4, -sqrt(2)*I/4],
+[sqrt(2)/4,   -sqrt(2)/4, -sqrt(2)*I/4,  sqrt(2)*I/4],
+[sqrt(2)/4,   -sqrt(2)/4,  sqrt(2)*I/4, -sqrt(2)*I/4],
+[sqrt(2)/4,  sqrt(2)*I/4, -sqrt(2)*I/4,   -sqrt(2)/4],
+[sqrt(2)/4, -sqrt(2)*I/4,  sqrt(2)*I/4,   -sqrt(2)/4]])]

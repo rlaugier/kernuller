@@ -1,0 +1,4 @@
+[Matrix([
+[sqrt(3)/3,                sqrt(3)/3,                sqrt(3)/3],
+[sqrt(3)/3,  sqrt(3)*exp(2*I*pi/3)/3, sqrt(3)*exp(-2*I*pi/3)/3],
+[sqrt(3)/3, sqrt(3)*exp(-2*I*pi/3)/3,  sqrt(3)*exp(2*I*pi/3)/3]])]
