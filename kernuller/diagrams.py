@@ -436,7 +436,7 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                plotout=False,minfrac=None,maxfrac=None,
                labels=False, legend=True,legendsize=8, legendstring="center left", title=None,
                out_label=None, rmax=None, show=True, labelsize=15,colors=colortraces,
-               rlabelpos=20, autorm=False, plotter=plot_trace,
+               rlabelpos=45, autorm=False, plotter=plot_trace,
                mainlinewidth=0.04, outputontop=True, msize=10,
                thealpha=0.5, color=("black", "silver"), outlabelloc=None, dpi=100,
                returnmatrix=False):
@@ -471,21 +471,42 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
         cbar_ax = fig.add_axes([0.05, 0.95, 0.9, 0.1])
         plt.xlabel("Wavelength [m]")
         plt.ylabel("Input index (Grey + is output)")
+        plt.title(title)
         
         if plotout is not False:
             if isinstance(plotout, sp.Matrix):
                 inarray = plotout
+                output = amatrix@inarray
+                out_matfunction = lambdifyz((lamb,), output, modules="numpy")
+                out_broacasted = out_matfunction(wlpoints, 0)
+                out_vector =  np.moveaxis(out_broacasted, 2, 0)
+                in_matfunction = lambdifyz((lamb,), inarray, modules="numpy")
+                in_broacasted = in_matfunction(wlpoints, 0)
+                matrix = np.einsum("ikj,ij->ikj", matrix, in_broacasted)
+            elif isinstance(plotout, np.ndarray):
+                inarray = plotout
+                out_matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
+                out_broacasted = out_matfunction(wlpoints, 0)
+                out_switch =  np.moveaxis(out_broacasted, 2, 0)
+                print("out_switch", out_switch.shape)
+                print("inarray", inarray.shape)
+                print("")
+                out_vector =  np.einsum("ikj,ij->ik",
+                                        out_switch, inarray)
+                #out_vector = inarray
+                matrix = np.einsum("ikj,ij->ikj", matrix, plotout)
+                
             else:
                 inarray = sp.ones(amatrix.shape[1],1)
-            output = amatrix@inarray
-            out_matfunction = lambdifyz((lamb,), output, modules="numpy")
-            out_broacasted = out_matfunction(wlpoints, 0)
+                output = amatrix@inarray
+                out_matfunction = lambdifyz((lamb,), output, modules="numpy")
+                out_broacasted = out_matfunction(wlpoints, 0)
+                out_vector =  np.moveaxis(out_broacasted, 2, 0)
             #out_matfunction = lambdify_void_mat((lamb,), output, modules="numpy")
             #out_broacasted = out_matfunction(wlpoints)
             #out_matfunction = ufuncify(lamb, output, backend="numpy")
             #out_broacasted = out_matfunction(wlpoints)
             
-            out_vector =  np.moveaxis(out_broacasted, 2, 0)
             for idx, theax in enumerate(axs.flatten()):
                 item = out_vector[:,idx]
                 #print(item)
