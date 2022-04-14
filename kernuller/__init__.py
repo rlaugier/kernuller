@@ -3,7 +3,7 @@ import numpy as np
 from . import kernel_cm
 from .kernel_cm import br, bo, vdg, bbr
 from . import interferometers
-from .interferometers import CHARA, VLTI, redarray, VLTI_AT_small, VLTI_AT_medium, VLTI_AT_large
+from .interferometers import CHARA, VLTI, redarray, VLTI_AT_small, VLTI_AT_medium, VLTI_AT_large, VLTI_AT_astrometric
 from . import diagrams
 from .diagrams import plot_outputs_smart as cmp
 #from .detection_maps import detection_maps as dmap

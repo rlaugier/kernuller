@@ -470,7 +470,7 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
         fig.subplots_adjust(top=0.9)
         cbar_ax = fig.add_axes([0.05, 0.95, 0.9, 0.1])
         plt.xlabel("Wavelength [m]")
-        plt.ylabel("Input index (Grey + is output)")
+        plt.ylabel("Input index \n(Grey + is output)")
         plt.title(title)
         
         if plotout is not False:
