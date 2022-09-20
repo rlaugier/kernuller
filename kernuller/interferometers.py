@@ -67,6 +67,17 @@ VLTI_AT_medium = get_list2layout(("K0", "G2", "D0", "J3"))
 VLTI_AT_small = get_list2layout(("A0", "B2", "D0", "C1"))
 VLTI_AT_astrometric = get_list2layout(("A0", "G1", "J2", "K0"))
 
+VLTI_AT_large5 = get_list2layout(("A0", "G1", "J2", "J3", "M0"))
+VLTI_AT_medium5 = get_list2layout(("K0", "G2", "D0", "J3", "H0"))
+VLTI_AT_small5 = get_list2layout(("A0", "B2", "D0", "C1", "E0"))
+VLTI_AT_astrometric5 = get_list2layout(("A0", "G1", "J2", "K0", "B5"))
+
+VLTI_AT_large6 = get_list2layout(("A0", "G1", "J2", "J3", "M0", "B5"))
+VLTI_AT_medium6 = get_list2layout(("K0", "G2", "D0", "J3", "H0", "J1"))
+#VLTI_AT_small6 = get_list2layout(("A0", "B2", "D0", "C3", "E0", "G2"))
+VLTI_AT_small6 = get_list2layout(("A0", "B2", "D1", "C2", "E0", "G0"))
+VLTI_AT_astrometric6 = get_list2layout(("A0", "G1", "J2", "K0", "B5", "E0"))
+
 
 #A redundant array
 
