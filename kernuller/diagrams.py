@@ -438,7 +438,7 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                out_label=None, rmax=None, show=True, labelsize=15,colors=colortraces,
                rlabelpos=45, autorm=False, plotter=plot_trace,
                mainlinewidth=0.04, outputontop=True, msize=10,
-               thealpha=0.5, color=("black", "silver"), outlabelloc=None, dpi=100,
+               thealpha=0.5, color=("grey", "whitesmoke"), outlabelloc=None, dpi=100,
                returnmatrix=False):
         matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
         broacasted = matfunction(wlpoints, 0)
@@ -534,6 +534,29 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                                            alpha=thealpha,
                                            minfrac=minfrac,
                                            maxfrac=maxfrac)
+            if out_label is not None:
+                    #set_trace()
+                    if outlabelloc is None:
+                        outlabelloc = (1.45*np.pi/2,1.2*rmax)
+                    for idx, theax in enumerate(axs.flatten()):
+                        #print(theax)
+                        if color is None:
+                            edgecolor = "C"+str((idx)//2)
+                            facecolor = "C"+str((idx)//2)
+                        elif color is False:
+                            facecolor = "white"
+                            edgecolor = "black"
+                        else:
+                            edgecolor, facecolor = color
+
+                        theax.text(outlabelloc[0], outlabelloc[1], str(out_label[idx]), size=12,
+                                ha="right", va="top", 
+                                bbox=dict(boxstyle="round",
+                                #facecolor="none",
+                                alpha=thealpha,
+                                facecolor=facecolor,
+                                edgecolor=edgecolor,
+                                ))
             #axs.flat[idx].legend(loc=legendstring,
             #                     prop={'size': legendsize},
             #                     bbox_to_anchor=legendoffset)
