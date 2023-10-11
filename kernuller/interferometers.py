@@ -104,3 +104,5 @@ N = [((statearthlocs[i].lat - statearthlocs[0].lat).to(u.rad) * radius).value fo
 E = [((statearthlocs[i].lon - statearthlocs[0].lon).to(u.rad) * radius).value for i in range(len(statearthlocs))]
 CHARA = np.array([N,E]).T
 
+LBTI = np.array([[-14.4/2, 0],
+                [14.4/2, 0]])

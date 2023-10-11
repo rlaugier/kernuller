@@ -4,8 +4,21 @@ import sympy as sp
 
 #from IPython.core.debugger import set_trace
 
-# Some colormaps chosen to mirror the default (Cx) series of colors
+# Some colormaps chosen to mirror to avoid deuteranomalyl Reds is swapped with RdBu
+# This avoids confusion between 2 and 3 
 colortraces = [plt.matplotlib.cm.Blues,
+              plt.matplotlib.cm.YlOrBr, # This in order to use oranges for the brouwns
+              plt.matplotlib.cm.Greens,
+              plt.matplotlib.cm.RdPu,
+              plt.matplotlib.cm.Purples,
+              plt.matplotlib.cm.Oranges,
+              plt.matplotlib.cm.Reds,
+              plt.matplotlib.cm.Greys,
+              plt.matplotlib.cm.YlOrRd,
+              plt.matplotlib.cm.GnBu]
+
+# Some colormaps chosen to mirror the default (Cx) series of colors
+colortraces_0 = [plt.matplotlib.cm.Blues,
               plt.matplotlib.cm.YlOrBr, # This in order to use oranges for the brouwns
               plt.matplotlib.cm.Greens,
               plt.matplotlib.cm.Reds,
@@ -15,6 +28,7 @@ colortraces = [plt.matplotlib.cm.Blues,
               plt.matplotlib.cm.Greys,
               plt.matplotlib.cm.YlOrRd,
               plt.matplotlib.cm.GnBu]
+
 
 
 def lambdifyz(symbols, expr, modules="numpy"):
@@ -439,12 +453,15 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                rlabelpos=45, autorm=False, plotter=plot_trace,
                mainlinewidth=0.04, outputontop=True, msize=10,
                thealpha=0.5, color=("grey", "whitesmoke"), outlabelloc=None, dpi=100,
-               returnmatrix=False):
-        matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
-        broacasted = matfunction(wlpoints, 0)
-        #matfunction = lambdify_void_mat((lamb,), amatrix, modules="numpy")
-        #broacasted = matfunction(wlpoints)#.astype(np.complex128)
-        matrix = np.moveaxis(broacasted, 2, 0)
+               returnmatrix=False, mp=np):
+        if len(amatrix.shape) == 2:
+            matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
+            broacasted = matfunction(wlpoints, 0)
+            #matfunction = lambdify_void_mat((lamb,), amatrix, modules="numpy")
+            #broacasted = matfunction(wlpoints)#.astype(np.complex128)
+            matrix = np.moveaxis(broacasted, 2, 0)
+        elif len(amatrix.shape) == 3:
+            matrix = amatrix
         if verbose:print(matrix)
         if ny is None:
             ny = matrix.shape[1]//nx
@@ -483,19 +500,22 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                 in_matfunction = lambdifyz((lamb,), inarray, modules="numpy")
                 in_broacasted = in_matfunction(wlpoints, 0)
                 matrix = np.einsum("ikj,ij->ikj", matrix, in_broacasted)
-            elif isinstance(plotout, np.ndarray):
+            elif isinstance(plotout, np.ndarray) or isinstance(amatrix, mp.ndarray):
                 inarray = plotout
-                out_matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
-                out_broacasted = out_matfunction(wlpoints, 0)
-                out_switch =  np.moveaxis(out_broacasted, 2, 0)
-                print("out_switch", out_switch.shape)
-                print("inarray", inarray.shape)
-                print("")
-                out_vector =  np.einsum("ikj,ij->ik",
-                                        out_switch, inarray)
-                #out_vector = inarray
-                matrix = np.einsum("ikj,ij->ikj", matrix, plotout)
-                
+                if isinstance(amatrix, sp.Matrix):
+                    out_matfunction = lambdifyz((lamb,), amatrix, modules="numpy")
+                    out_broacasted = out_matfunction(wlpoints, 0)
+                    out_switch =  np.moveaxis(out_broacasted, 2, 0)
+                    print("out_switch", out_switch.shape)
+                    print("inarray", inarray.shape)
+                    print("")
+                    out_vector =  np.einsum("ikj,ij->ik",
+                                            out_switch, inarray)
+                    #out_vector = inarray
+                    matrix = np.einsum("ikj,ij->ikj", matrix, plotout)
+                elif isinstance(amatrix, np.ndarray) or isinstance(amatrix, mp.ndarray):
+                    print("direct matrix to matrix")
+                    out_vector = np.einsum("w o i, w i -> w o" , amatrix, inarray)
             else:
                 inarray = sp.ones(amatrix.shape[1],1)
                 output = amatrix@inarray
