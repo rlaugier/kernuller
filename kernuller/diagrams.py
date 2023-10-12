@@ -364,7 +364,7 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
         if autorm is True:
             rowstoremove = np.prod(matrix, axis=1) == 0
         elif autorm is False:
-            rowstoremove = np.zeros(matrix.shape[0], dtype=np.bool)
+            rowstoremove = np.zeros(matrix.shape[0], dtype=bool)
         else :
             rowstoremove = autorm
         #Making a pretty legend for the phase term

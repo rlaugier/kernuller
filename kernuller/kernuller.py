@@ -392,7 +392,7 @@ class kernuller(object):
             print(A)
             
         u,s,vh = np.linalg.svd(A.T)
-        take = np.concatenate((s<1e-6,np.ones(u.shape[1]-s.shape[0], dtype=np.bool)))
+        take = np.concatenate((s<1e-6,np.ones(u.shape[1]-s.shape[0], dtype=bool)))
         #print(take)
         K = vh[take]
         if verbose:
@@ -501,7 +501,7 @@ class kernuller(object):
             print("The A matrix")
             print(A)   
         u,s,vh = np.linalg.svd(A.T)
-        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=np.bool)))
+        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=bool)))
         print(take)
         K = vh[take]
         if verbose:
@@ -671,7 +671,7 @@ class kernuller(object):
             print("The A matrix")
             print(A)   
         u,s,vh = np.linalg.svd(A.T)
-        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=np.bool)))
+        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=bool)))
         K = vh[take]
         if verbose:
             print("The K matrix")
@@ -790,7 +790,7 @@ class kernuller(object):
             print("The A matrix")
             print(A)   
         u,s,vh = np.linalg.svd(A.T)
-        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=np.bool)))
+        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=bool)))
         K = vh[take]
         if verbose:
             print("The K matrix")
@@ -847,7 +847,7 @@ class kernuller(object):
         Ms = phasors
         
         if mask is None:
-            mask = np.ones(Ms.shape[0],dtype=np.bool)
+            mask = np.ones(Ms.shape[0],dtype=bool)
             mask[0] = False
             
         Nps = []
@@ -915,7 +915,7 @@ class kernuller(object):
             print("The A matrix")
             print(A)   
         u,s,vh = np.linalg.svd(A.T)
-        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=np.bool)))
+        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=bool)))
         K = vh[take]
         if verbose:
             print(take)
@@ -959,7 +959,7 @@ class kernuller(object):
         else :
             Ms = sp.Matrix(M)
         if mask is None:
-            mask = np.ones(Ms.shape[0],dtype=np.bool)
+            mask = np.ones(Ms.shape[0],dtype=bool)
             mask[0] = False
             
         Nps = []
@@ -1036,7 +1036,7 @@ class kernuller(object):
             print("The A matrix")
             print(A)   
         u,s,vh = np.linalg.svd(A.T)
-        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=np.bool)))
+        take = np.concatenate((s<1e-6,np.ones(vh.shape[1]-s.shape[0], dtype=bool)))
         K = vh[take]
         if verbose:
             print(take)
@@ -1408,7 +1408,7 @@ class kernuller(object):
         if autorm is True:
             rowstoremove = np.prod(matrix, axis=1) == 0
         elif autorm is False:
-            rowstoremove = np.zeros(matrix.shape[0], dtype=np.bool)
+            rowstoremove = np.zeros(matrix.shape[0], dtype=bool)
         else :
             rowstoremove = autorm
         #Making a pretty legend for the phase term
