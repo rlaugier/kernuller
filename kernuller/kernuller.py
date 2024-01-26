@@ -1418,7 +1418,7 @@ class kernuller(object):
         #xL=['0',r'$\pi/4$',r'$\pi/2$',r'$3\pi/4$',\
         #        r'$\pi$',r'$5\pi/4$',r'$3\pi/2}$',r'$7\pi/4$']
         xT = np.arange(0, 2*np.pi,np.pi/2)
-        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2}$']
+        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2$']
         #copying teh ytick labels from the first plot
         #yT = np.linspace(0,0.75*rmax.real,3).round(decimals=1)[1:]
         #yL = [str(yT[b]) for b in np.arange(yT.shape[0])]
