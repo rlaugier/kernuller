@@ -374,7 +374,7 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
         #xL=['0',r'$\pi/4$',r'$\pi/2$',r'$3\pi/4$',\
         #        r'$\pi$',r'$5\pi/4$',r'$3\pi/2}$',r'$7\pi/4$']
         xT = np.arange(0, 2*np.pi,np.pi/2)
-        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2}$']
+        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2$']
         #copying teh ytick labels from the first plot
         #yT = np.linspace(0,0.75*rmax.real,3).round(decimals=1)[1:]
         #yL = [str(yT[b]) for b in np.arange(yT.shape[0])]
@@ -584,7 +584,7 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
 
         
         xT = np.arange(0, 2*np.pi,np.pi/2)
-        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2}$']
+        xL=['0',r'$\pi/2$', r'$\pi$',r'$3\pi/2$']
         for i in np.flip(np.arange(matrix.shape[1])):
             
             fig.axes[i].set_xticks(xT)
