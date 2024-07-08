@@ -4,6 +4,10 @@ include kernuller/data/3T_matrix.npy
 include kenruller/data/4T_matrix.npy
 include kernuller/data/5T_matrices.npy
 include kernuller/data/6T_matrices.npy
+include kernuller/data/3T_matrices.txt
+include kernuller/data/4T_matrices.txt
+include kernuller/data/5T_matrices.txt
+include kernuller/data/6T_matrices.txt
 include kernuller/data/5T_recipes.npy
 include kernuller/data/6T_recipes.npy
 include kernuller/data/vlti_at_large.npy
