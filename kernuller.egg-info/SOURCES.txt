@@ -14,12 +14,16 @@ kernuller.egg-info/dependency_links.txt
 kernuller.egg-info/not-zip-safe
 kernuller.egg-info/requires.txt
 kernuller.egg-info/top_level.txt
+kernuller/data/3T_matrices.txt
 kernuller/data/3T_matrix.npy
+kernuller/data/4T_matrices.txt
 kernuller/data/4T_matrix.npy
 kernuller/data/5T_goodmats.npy
 kernuller/data/5T_matrices.npy
+kernuller/data/5T_matrices.txt
 kernuller/data/5T_recipes.npy
 kernuller/data/6T_matrices.npy
+kernuller/data/6T_matrices.txt
 kernuller/data/6T_recipes.npy
 kernuller/data/chara.dat
 kernuller/data/vlti_at_large.npy

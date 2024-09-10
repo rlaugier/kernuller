@@ -42,13 +42,13 @@ resource_path = Path(__file__).parent / "data"
     
 matrixfile = resource_path.joinpath("6T_matrices.txt")
 with open(matrixfile, "r") as f:
-    matrices_6T = sp.sympify(f.read())
+    matrices_6T = sp.sympify(f.read(), strict=False)
 matrixfile = resource_path.joinpath("5T_matrices.txt")
 with open(matrixfile, "r") as f:
-    matrices_5T = sp.sympify(f.read())
+    matrices_5T = sp.sympify(f.read(), strict=False)
 matrixfile = resource_path.joinpath("4T_matrices.txt")
 with open(matrixfile, "r") as f:
-    matrices_4T = sp.sympify(f.read())
+    matrices_4T = sp.sympify(f.read(), strict=False)
 matrixfile = resource_path.joinpath("3T_matrices.txt")
 with open(matrixfile, "r") as f:
-    matrices_3T = sp.sympify(f.read())
+    matrices_3T = sp.sympify(f.read(), strict=False)
