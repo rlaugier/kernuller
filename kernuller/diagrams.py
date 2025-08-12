@@ -569,6 +569,7 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                         else:
                             edgecolor, facecolor = color
 
+
                         theax.text(outlabelloc[0], outlabelloc[1], str(out_label[idx]), size=12,
                                 ha="right", va="top", 
                                 bbox=dict(boxstyle="round",

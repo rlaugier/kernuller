@@ -9,6 +9,8 @@ import astropy
 import astropy.units as u
 import copy
 
+from scipy.special import factorial
+
 from itertools import combinations, permutations
 
 from IPython.core.debugger import set_trace
@@ -94,13 +96,13 @@ def expected_numbers(Na):
     print("Assuming nonredundant baselines")
     Nas = sp.symbols("n_a")
     Nn = Na -1
-    Nbl = np.math.factorial(Na)/\
-        (np.math.factorial(2)*np.math.factorial(Na-2))
+    Nbl = factorial(Na)/\
+        (factorial(2)*factorial(Na-2))
     print("Baselines", Nbl)
-    Nderivatives = Nn + np.math.factorial(Nn)/\
-                (np.math.factorial(2)*np.math.factorial(Nn-2))
+    Nderivatives = Nn + factorial(Nn)/\
+                (factorial(2)*factorial(Nn-2))
     print("Number of second order derivatives", Nderivatives)
-    Nnulls = np.math.factorial(Nn)
+    Nnulls = factorial(Nn)
     print("Number of nulls", Nnulls)
     Nthk = Nbl - (Na - 1)
     Nthks = (Nas - 1) * (Nas - 2) / 2
@@ -709,8 +711,8 @@ class kernuller(object):
             #return
         #self.Nthk = len(list(itertools.combinations(np.arange(self.Na), 2))) - (self.Na - 1)
 
-        Nbl = np.math.factorial(self.Na)/\
-            (np.math.factorial(2)*np.math.factorial(self.Na-2))
+        Nbl = factorial(self.Na)/\
+            (factorial(2)*factorial(self.Na-2))
         self.Nthk = Nbl - (self.Na - 1)
         thetas = sp.symbols("theta")
 
@@ -830,8 +832,8 @@ class kernuller(object):
             #return
         #self.Nthk = len(list(itertools.combinations(np.arange(self.Na), 2))) - (self.Na - 1)
 
-        Nbl = np.math.factorial(self.Na)/\
-            (np.math.factorial(2)*np.math.factorial(self.Na-2))
+        Nbl = factorial(self.Na)/\
+            (factorial(2)*factorial(self.Na-2))
         self.Nthk = Nbl - (self.Na - 1)
         thetas = sp.symbols("theta")
 
@@ -970,8 +972,8 @@ class kernuller(object):
         
             
 
-        Nbl = np.math.factorial(self.Na)/\
-            (np.math.factorial(2)*np.math.factorial(self.Na-2))
+        Nbl = factorial(self.Na)/\
+            (factorial(2)*factorial(self.Na-2))
         self.Nthk = Nbl - (self.Na - 1)
         thetas = sp.symbols("theta")
 
