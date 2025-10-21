@@ -49,7 +49,8 @@ def lambdifyz(symbols, expr, modules="numpy"):
 
 def plotitem(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
              baseoffset=0, linestyle="-", label="X", linewidth=5,
-             labels=True, projection="polar", rmax=1.,zorder=1):
+             labels=True, projection="polar", rmax=1.,zorder=1,
+             atol=1e-4):
     """
     A function that serves as a macro to plot the complex amplitude vectord for CMP
     
@@ -70,11 +71,12 @@ def plotitem(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
     labels   : Whether to include a little label for each vector
     projection : Whether to use a polar or cartesian projection (cartesian no longer maintained)
     rmax      : The maximum norm to for the plot 
+    atol      : Absolute tolerance of overlap before shifting the vector
     """
     
     offset = osfrac*np.abs(item)*np.exp(1j*(np.angle(item)+np.pi/2))
     
-    while item in plotted:
+    while any([np.isclose(item, aplotted, atol=atol) for aplotted in plotted]):
         item += offset
         baseoffset += offset
     if projection=="polar":
@@ -116,7 +118,8 @@ def plotitem(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
 
 def plotitem_arrow(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
              baseoffset=0, linestyle="-", label="X", linewidth=0.025,
-             labels=True, projection="polar", rmax=1., addring=False, zorder=1):
+             labels=True, projection="polar", rmax=1., addring=False, zorder=1,
+             atol=1e-4):
     """
     A function that serves as a macro to plot the complex amplitude vectord for CMP
     
@@ -146,7 +149,7 @@ def plotitem_arrow(axs, item, plotted, nx, idx,k, osfrac=0.1,verbose=False,
         thecolor = "C"+str(k)
     
     if verbose: print("initial",item)
-    while item+baseoffset in plotted:
+    while any([np.isclose(item+baseoffset, aplotted, atol=atol) for aplotted in plotted]):
         #item += offset
         baseoffset += offset
         if verbose: print("shifting")
@@ -207,7 +210,8 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
                        labels=False, legend=True,legendsize=8, legendstring="center left", title=None, projection="polar",
                        out_label=None, rmax=None, show=True, onlyoneticklabel=False, labelsize=15,
                        rlabelpos=20, autorm=False, plotter=plotitem_arrow, mainlinewidth=0.04, outputontop=False,
-                       thealpha=0.1, color=("black", "silver"), outlabelloc=None, dpi=100):
+                       thealpha=0.1, color=("black", "silver"), outlabelloc=None, dpi=100,
+                       atol=1.0e-4):
         """
         Produces a Complex Matrix Plot (CMP) of a combiner matrix. The matrix represents the phasors in each cell of the matrix. In cases where the matrix is designed to take as an input cophased beams of equal amplitude, the plots can also be seen as a representation of the decomposition of the outputs into the contribution of each input.
         returns a fig, and  axs objects.
@@ -235,10 +239,8 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
         rlabelpos: The angle at which to put the amplitude tick labels (default: 20)
         autorm   : Automatically remove empty rows True=auto, False=keep all, Boolean array: the rows to remove
         plotter  : A function for plotting fancy arrow vectors
+        atol      : Absolute tolerance of overlap before shifting the vector
         """
-        special = True
-        
-            
         if inputfield is not None:
             initialmatrix = matrix
             matrix = matrix.dot(np.diag(inputfield))
@@ -284,7 +286,8 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
                     plotted = plotter(axs.flat, item, plotted, nx, idx, "black", verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
                                            linestyle="-", label="Output "+str(idx), labels=addlabel,
-                                           projection=projection, rmax=rmax, addring=True, zorder=1)
+                                           projection=projection, rmax=rmax, addring=True, zorder=1,
+                                           atol=atol)
                     
                     
                     
@@ -300,7 +303,7 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
                         plotted = plotter(axs.flat, item, plotted, nx, idx, k, verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
                                            linestyle="-", label="Input "+str(k), labels=addlabel,
-                                           projection=projection, rmax=rmax)
+                                           projection=projection, rmax=rmax, atol=atol)
                 
                 plotted2 = []
                 adjus2t = []
@@ -315,7 +318,8 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
                             plotted = plotitem(axs.flat, item, plotted2, nx, idx, k,
                                            osfrac=osfrac, baseoffset=baseoffset,
                                            linestyle="--", label=None, labels=False,
-                                           projection=projection, rmax=rmax, linewidth=3, zorder=0)
+                                           projection=projection, rmax=rmax, linewidth=3,
+                                           zorder=0, atol=atol)
                 #Plotting the output result (black stuff)
                 if (outvec is not None) and ((idx)<matrix.shape[0]) and outputontop:
                     print("we do plot on top")
@@ -325,7 +329,8 @@ def plot_outputs_smart(matrix=None, inputfield=None, base_preoffset=None, nx=2,n
                     plotted = plotter(axs.flat, item, plotted, nx, idx, "black", verbose=verbose,
                                            osfrac=osfrac, baseoffset=baseoffset,linewidth=mainlinewidth,
                                            linestyle="-", label="Output", labels=addlabel,
-                                           projection=projection, rmax=rmax, addring=True, zorder=4)
+                                           projection=projection, rmax=rmax, addring=True, zorder=4,
+                                           atol=atol)
                     
                 
                     
