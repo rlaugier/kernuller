@@ -702,12 +702,15 @@ class kernuller(object):
         on the itertools.combinations_with_replacements function
         """
         if self.Np is not None:
-            print("The model will be replaced")
+            if verbose:
+                print("The model will be replaced")
         else:
-            print("Building a model from scratch")
+            if verbose:
+                print("Building a model from scratch")
 
         if self.Na >= 9:
-            print("Warning, this makes huge matrices")
+            if verbose:
+                print("Warning, this makes huge matrices")
             #return
         #self.Nthk = len(list(itertools.combinations(np.arange(self.Na), 2))) - (self.Na - 1)
 

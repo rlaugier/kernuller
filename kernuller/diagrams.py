@@ -492,7 +492,26 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
         fig.subplots_adjust(top=0.9)
         cbar_ax = fig.add_axes([0.05, 0.95, 0.9, 0.1])
         plt.xlabel("Wavelength [m]")
-        plt.ylabel("Input index \n(Grey + is output)")
+        theylabel = "Input index"
+        if plotout is not False:
+            theylabel += "\n(Grey + is output)"
+        plt.ylabel(theylabel)
+        margin = 0.5
+        if plotout is False:
+            yticklocs = np.arange(ntot)
+            ytickvals = [f"In {anin}" for anin in yticklocs]
+            ymin = -margin
+            ymax = ntot + margin/2
+        else:
+            yticklocs = np.arange(ntot+1)
+            ytickvals = [f"In {anin}" for anin in yticklocs]
+            ytickvals.pop()
+            ytickvals.append("Out")
+            ymin = -margin
+            ymax = ntot + 1 + margin/2
+        
+        plt.yticks(yticklocs, ytickvals)
+        plt.ylim(ymin, ymax)
         plt.title(title)
         
         if plotout is not False:
@@ -538,7 +557,7 @@ def plot_chromatic_matrix(amatrix, lamb, wlpoints,nx=2,ny=None,legendoffset=(-0.
                 plotted = plotter(theax, item, wlpoints,
                                   cmap="Greys",
                                   label="Output "+str(idx),
-                                  verbose=verbose,msize=msize, rmax=rmax,
+                                  verbose=verbose, msize=msize, rmax=rmax,
                                   cbar_ax=cbar_ax, k=ntot, alpha=thealpha,
                                   marker="+", s=100.,
                                   minfrac=minfrac,
